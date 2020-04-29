@@ -1,29 +1,20 @@
 extern crate nalgebra_glm as glm;
-use glium::glutin;
 use glium::glutin::event::VirtualKeyCode;
 use glm::{Vec3, Mat4};
-//TODO clean
+
 pub struct CameraState {
-    position: (f32, f32, f32),
-    direction: (f32, f32, f32),
     eye: Vec3,
     up: Vec3,
     look: Vec3,
     center: Vec3,
+    tangent: Vec3,
     keys: Vec<VirtualKeyCode>,
-
-    moving_up: bool,
-    moving_left: bool,
-    moving_down: bool,
-    moving_right: bool,
-    moving_forward: bool,
-    moving_backward: bool,
 }
 
 impl CameraState {
     const CAMERA_DISTANCE: f32 = 10.0;
     const ZOOM_SPEED: f32 = 0.1;
-    const PAN_SPEED: f32 = 0.05;
+    const PAN_SPEED: f32 = 0.1;
 }
 
 impl CameraState {
@@ -32,20 +23,14 @@ impl CameraState {
         let up: Vec3 = glm::vec3(0.0, 1.0, 0.0);
         let look: Vec3 = glm::vec3(-0.5, -0.5, 0.0);
         let center: Vec3 = eye - CameraState::CAMERA_DISTANCE * look;
+        let tangent: Vec3 = glm::cross(&look, &up);
  
         CameraState {
-            position: (0.1, 0.1, 1.0),
-            direction: (0.0, 0.0, -1.0),
-            moving_up: false,
-            moving_left: false,
-            moving_down: false,
-            moving_right: false,
-            moving_forward: false,
-            moving_backward: false,
             eye: eye,
             up: up, 
             look: look, 
             center: center,
+            tangent: tangent,
             keys: Vec::new(),
         }
     }
@@ -64,54 +49,27 @@ impl CameraState {
     }
 
     pub fn update(&mut self) {
-        let f = {
-            let f = self.direction;
-            let len = f.0 * f.0 + f.1 * f.1 + f.2 * f.2;
-            let len = len.sqrt();
-            (f.0 / len, f.1 / len, f.2 / len)
-        };
-
-        let up = (0.0, 1.0, 0.0);
-
-        let s = (f.1 * up.2 - f.2 * up.1,
-                 f.2 * up.0 - f.0 * up.2,
-                 f.0 * up.1 - f.1 * up.0);
-
-        let s = {
-            let len = s.0 * s.0 + s.1 * s.1 + s.2 * s.2;
-            let len = len.sqrt();
-            (s.0 / len, s.1 / len, s.2 / len)
-        };
-
-        let u = (s.1 * f.2 - s.2 * f.1,
-                 s.2 * f.0 - s.0 * f.2,
-                 s.0 * f.1 - s.1 * f.0);
-
-        if self.moving_up {
+        if self.keys.contains(&VirtualKeyCode::Up) {
             self.eye += CameraState::PAN_SPEED * self.up; 
         }
 
-        if self.moving_left {
-            self.position.0 -= s.0 * 0.01;
-            self.position.1 -= s.1 * 0.01;
-            self.position.2 -= s.2 * 0.01;
+        if self.keys.contains(&VirtualKeyCode::A) {
+            self.eye += CameraState::PAN_SPEED * self.tangent;
         }
 
-        if self.moving_down {
+        if self.keys.contains(&VirtualKeyCode::Down) {
             self.eye -= CameraState::PAN_SPEED * self.up; 
         }
 
-        if self.moving_right {
-            self.position.0 += s.0 * 0.01;
-            self.position.1 += s.1 * 0.01;
-            self.position.2 += s.2 * 0.01;
+        if self.keys.contains(&VirtualKeyCode::D) {
+            self.eye -= CameraState::PAN_SPEED * self.tangent;
         }
 
-        if self.moving_forward {
+        if self.keys.contains(&VirtualKeyCode::W) {
             self.eye += CameraState::ZOOM_SPEED * self.look;
         }
 
-        if self.moving_backward {
+        if self.keys.contains(&VirtualKeyCode::S) {
             self.eye -= CameraState::ZOOM_SPEED * self.look;
         }
     }
@@ -124,19 +82,9 @@ impl CameraState {
         );
 
         if pressed {
-
+            self.keys.push(key);
         } else {
-
+            self.keys.retain(|&x| { x != key });
         }
-
-        match key {
-            glutin::event::VirtualKeyCode::Up => self.moving_up = pressed,
-            glutin::event::VirtualKeyCode::Down => self.moving_down = pressed,
-            glutin::event::VirtualKeyCode::A => self.moving_left = pressed,
-            glutin::event::VirtualKeyCode::D => self.moving_right = pressed,
-            glutin::event::VirtualKeyCode::W => self.moving_forward = pressed,
-            glutin::event::VirtualKeyCode::S => self.moving_backward = pressed,
-            _ => (),
-        };
     }
 }
