@@ -38,10 +38,10 @@ impl Engine {
             VertexBuffer::new(&display, cube_vertices.as_slice()).unwrap()
         };
 
-        let mut camera = CameraState::new();
+        let camera = CameraState::new();
 
-        camera.set_position((10., 10., 0.));
-        camera.set_direction((-0.5, -0.5, 0.));
+        // camera.set_position((10., 10., 0.));
+        // camera.set_direction((-0.5, -0.5, 0.));
 
         let mut chunks = Vec::new();
         chunks.push(Chunk::new());
@@ -59,10 +59,12 @@ impl Engine {
         let mut target = self.display.draw();
         target.clear_color_and_depth((0.529, 0.808, 0.980, 1.0), 1.0);
 
+        self.camera.update();
+
         // building the uniforms
         let uniforms = uniform! {
-          persp_matrix: self.camera.get_perspective(),
-          view_matrix: self.camera.get_view(),
+          persp_matrix: *(self.camera.get_perspective().as_ref()),
+          view_matrix: *(self.camera.get_view().as_ref()),
         };
 
         // draw parameters
@@ -95,10 +97,6 @@ impl Engine {
     }
 
     pub fn process_keyboard(&mut self, pressed: bool, key: VirtualKeyCode) {
-        println!(
-            "{} key: {:#?}!",
-            if pressed { "Pressed" } else { "Released" },
-            key
-        );
+        self.camera.process_input(pressed, key);
     }
 }
