@@ -16,17 +16,15 @@ fn main() {
         .with_depth_buffer(24) //bits
         .with_vsync(true);
 
-    let display = glium::Display::new(window, context, &event_loop).unwrap();
 
-    let mut engine = engine::Engine::new(&display);
-    
-
+    let mut engine = {
+        let display = glium::Display::new(window, context, &event_loop).unwrap();
+        engine::Engine::new(display)
+    };
+   
     event_loop.run(move |ev, _, control_flow| {
 
-        let mut target = display.draw();
-        target.clear_color_and_depth((0.529, 0.808, 0.980, 1.0), 1.0);
-        engine.render(&mut target);
-        target.finish().unwrap();
+        engine.render();
 
         let next_frame_time = std::time::Instant::now() +
             std::time::Duration::from_nanos(16_666_667);
