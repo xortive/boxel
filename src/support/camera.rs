@@ -2,11 +2,11 @@ extern crate nalgebra_glm as glm;
 use glium::glutin::event::VirtualKeyCode;
 use glm::{Vec3, Mat4};
 
+#[derive(Debug)]
 pub struct CameraState {
     eye: Vec3,
     up: Vec3,
     look: Vec3,
-    center: Vec3,
     tangent: Vec3,
     keys: Vec<VirtualKeyCode>,
 }
@@ -22,14 +22,12 @@ impl CameraState {
         let eye: Vec3 = glm::vec3(CameraState::CAMERA_DISTANCE, CameraState::CAMERA_DISTANCE, 0.0);
         let up: Vec3 = glm::vec3(0.0, 1.0, 0.0);
         let look: Vec3 = glm::vec3(-0.5, -0.5, 0.0);
-        let center: Vec3 = eye - CameraState::CAMERA_DISTANCE * look;
         let tangent: Vec3 = glm::cross(&look, &up);
  
         CameraState {
             eye: eye,
             up: up, 
             look: look, 
-            center: center,
             tangent: tangent,
             keys: Vec::new(),
         }
@@ -45,7 +43,8 @@ impl CameraState {
     }
 
     pub fn get_view(&self) -> Mat4 {
-        return glm::look_at(&self.eye, &self.center, &self.up);
+        let center = self.eye - CameraState::CAMERA_DISTANCE * self.look;
+        return glm::look_at(&self.eye, &center, &self.up);
     }
 
     pub fn update(&mut self) {

@@ -98,5 +98,6 @@ impl Engine {
 
     pub fn process_keyboard(&mut self, pressed: bool, key: VirtualKeyCode) {
         self.camera.process_input(pressed, key);
+        println!("{:#?}", self.camera);
     }
 }
