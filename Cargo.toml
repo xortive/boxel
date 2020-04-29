@@ -1,0 +1,27 @@
+[package]
+name = "boxel"
+version = "0.1.0"
+authors = ["Matthew Alonso <granjef3@gmail.com>"]
+edition = "2018"
+default-run = "boxel"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+glium = "*"
+nalgebra = "0.21.0"
+genmesh = "0.6.2"
+image = "0.23.4"
+tobj = "1.0.0"
+wavefront_obj = "7.0.0"
+derive_more = "0.99.5"
+rand = "0.7.3"
+obj = { version="0.9.1", features=["genmesh"] }
+
+[[bin]]
+name = "test"
+path = "src/test.rs"
+
+[[bin]]
+name = "boxel"
+path = "src/main.rs"
