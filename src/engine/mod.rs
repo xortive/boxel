@@ -40,8 +40,10 @@ impl Engine {
 
         let mut camera = CameraState::new();
 
+        /*
         camera.set_position((10., 10., 0.));
         camera.set_direction((-0.5, -0.5, 0.));
+        */
 
         let mut chunks = Vec::new();
         chunks.push(Chunk::new());
@@ -61,8 +63,8 @@ impl Engine {
 
         // building the uniforms
         let uniforms = uniform! {
-          persp_matrix: self.camera.get_perspective(),
-          view_matrix: self.camera.get_view(),
+          persp_matrix: *(self.camera.get_perspective().as_ref()),
+          view_matrix: *(self.camera.get_view().as_ref()),
         };
 
         // draw parameters

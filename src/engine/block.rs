@@ -1,5 +1,5 @@
 use crate::primitives::InstanceAttr;
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Block {
   pub position: (f32, f32, f32),
 }
