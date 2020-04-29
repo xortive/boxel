@@ -9,6 +9,7 @@ default-run = "boxel"
 
 [dependencies]
 glium = "*"
+nalgebra-glm = "0.3"
 nalgebra = "0.21.0"
 genmesh = "0.6.2"
 image = "0.23.4"

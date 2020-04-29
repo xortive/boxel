@@ -1,9 +1,16 @@
+extern crate nalgebra_glm as glm;
 use glium::glutin;
+use glium::glutin::event::VirtualKeyCode;
+use glm::{Vec3, Mat4};
 //TODO clean
 pub struct CameraState {
-    aspect_ratio: f32,
     position: (f32, f32, f32),
     direction: (f32, f32, f32),
+    eye: Vec3,
+    up: Vec3,
+    look: Vec3,
+    center: Vec3,
+    keys: Vec<VirtualKeyCode>,
 
     moving_up: bool,
     moving_left: bool,
@@ -14,9 +21,19 @@ pub struct CameraState {
 }
 
 impl CameraState {
+    const CAMERA_DISTANCE: f32 = 10.0;
+    const ZOOM_SPEED: f32 = 0.1;
+    const PAN_SPEED: f32 = 0.05;
+}
+
+impl CameraState {
     pub fn new() -> CameraState {
+        let eye: Vec3 = glm::vec3(CameraState::CAMERA_DISTANCE, CameraState::CAMERA_DISTANCE, 0.0);
+        let up: Vec3 = glm::vec3(0.0, 1.0, 0.0);
+        let look: Vec3 = glm::vec3(-0.5, -0.5, 0.0);
+        let center: Vec3 = eye - CameraState::CAMERA_DISTANCE * look;
+ 
         CameraState {
-            aspect_ratio: 1024.0 / 768.0,
             position: (0.1, 0.1, 1.0),
             direction: (0.0, 0.0, -1.0),
             moving_up: false,
@@ -25,68 +42,25 @@ impl CameraState {
             moving_right: false,
             moving_forward: false,
             moving_backward: false,
+            eye: eye,
+            up: up, 
+            look: look, 
+            center: center,
+            keys: Vec::new(),
         }
     }
 
-    pub fn set_position(&mut self, pos: (f32, f32, f32)) {
-        self.position = pos;
-    }
-
-    pub fn set_direction(&mut self, dir: (f32, f32, f32)) {
-        self.direction = dir;
-    }
-
-    pub fn get_perspective(&self) -> [[f32; 4]; 4] {
+    pub fn get_perspective(&self) -> Mat4 {
+        let aspect = 1024.0 / 768.0;
         let fov: f32 = 3.141592 / 2.0;
         let zfar = 1024.0;
-        let znear = 0.1;
-
-        let f = 1.0 / (fov / 2.0).tan();
-
-        // note: remember that this is column-major, so the lines of code are actually columns
-        [
-            [f / self.aspect_ratio,    0.0,              0.0              ,   0.0],
-            [         0.0         ,     f ,              0.0              ,   0.0],
-            [         0.0         ,    0.0,  (zfar+znear)/(zfar-znear)    ,   1.0],
-            [         0.0         ,    0.0, -(2.0*zfar*znear)/(zfar-znear),   0.0],
-        ]
+        let znear = 1.0;
+        
+        return glm::perspective_lh(aspect, fov, znear, zfar);
     }
 
-    pub fn get_view(&self) -> [[f32; 4]; 4] {
-        let f = {
-            let f = self.direction;
-            let len = f.0 * f.0 + f.1 * f.1 + f.2 * f.2;
-            let len = len.sqrt();
-            (f.0 / len, f.1 / len, f.2 / len)
-        };
-
-        let up = (0.0, 1.0, 0.0);
-
-        let s = (f.1 * up.2 - f.2 * up.1,
-                 f.2 * up.0 - f.0 * up.2,
-                 f.0 * up.1 - f.1 * up.0);
-
-        let s_norm = {
-            let len = s.0 * s.0 + s.1 * s.1 + s.2 * s.2;
-            let len = len.sqrt();
-            (s.0 / len, s.1 / len, s.2 / len)
-        };
-
-        let u = (s_norm.1 * f.2 - s_norm.2 * f.1,
-                 s_norm.2 * f.0 - s_norm.0 * f.2,
-                 s_norm.0 * f.1 - s_norm.1 * f.0);
-
-        let p = (-self.position.0 * s.0 - self.position.1 * s.1 - self.position.2 * s.2,
-                 -self.position.0 * u.0 - self.position.1 * u.1 - self.position.2 * u.2,
-                 -self.position.0 * f.0 - self.position.1 * f.1 - self.position.2 * f.2);
-
-        // note: remember that this is column-major, so the lines of code are actually columns
-        [
-            [s_norm.0, u.0, f.0, 0.0],
-            [s_norm.1, u.1, f.1, 0.0],
-            [s_norm.2, u.2, f.2, 0.0],
-            [p.0, p.1,  p.2, 1.0],
-        ]
+    pub fn get_view(&self) -> Mat4 {
+        return glm::look_at(&self.eye, &self.center, &self.up);
     }
 
     pub fn update(&mut self) {
@@ -114,9 +88,7 @@ impl CameraState {
                  s.0 * f.1 - s.1 * f.0);
 
         if self.moving_up {
-            self.position.0 += u.0 * 0.01;
-            self.position.1 += u.1 * 0.01;
-            self.position.2 += u.2 * 0.01;
+            self.eye += CameraState::PAN_SPEED * self.up; 
         }
 
         if self.moving_left {
@@ -126,9 +98,7 @@ impl CameraState {
         }
 
         if self.moving_down {
-            self.position.0 -= u.0 * 0.01;
-            self.position.1 -= u.1 * 0.01;
-            self.position.2 -= u.2 * 0.01;
+            self.eye -= CameraState::PAN_SPEED * self.up; 
         }
 
         if self.moving_right {
@@ -138,28 +108,27 @@ impl CameraState {
         }
 
         if self.moving_forward {
-            self.position.0 += f.0 * 0.01;
-            self.position.1 += f.1 * 0.01;
-            self.position.2 += f.2 * 0.01;
+            self.eye += CameraState::ZOOM_SPEED * self.look;
         }
 
         if self.moving_backward {
-            self.position.0 -= f.0 * 0.01;
-            self.position.1 -= f.1 * 0.01;
-            self.position.2 -= f.2 * 0.01;
+            self.eye -= CameraState::ZOOM_SPEED * self.look;
         }
     }
 
-    pub fn process_input(&mut self, event: &glutin::event::WindowEvent) {
-        let input = match *event {
-            glutin::event::WindowEvent::KeyboardInput { input, .. } => input,
-            _ => return,
-        };
-        let pressed = input.state == glutin::event::ElementState::Pressed;
-        let key = match input.virtual_keycode {
-            Some(key) => key,
-            None => return,
-        };
+    pub fn process_input(&mut self, pressed: bool, key: VirtualKeyCode) {
+        println!(
+            "{} key: {:#?}!",
+            if pressed { "Pressed" } else { "Released" },
+            key
+        );
+
+        if pressed {
+
+        } else {
+
+        }
+
         match key {
             glutin::event::VirtualKeyCode::Up => self.moving_up = pressed,
             glutin::event::VirtualKeyCode::Down => self.moving_down = pressed,

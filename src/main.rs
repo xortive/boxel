@@ -1,4 +1,5 @@
 use glium::{glutin, Surface};
+extern crate nalgebra_glm as glm;
 
 mod primitives;
 mod engine;

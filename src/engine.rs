@@ -56,9 +56,10 @@ impl Engine {
 
     pub fn render(&mut self, target: &mut glium::Frame) {
         // building the uniforms
+        self.camera.update();
         let uniforms = uniform! {
-          persp_matrix: self.camera.get_perspective(),
-          view_matrix: self.camera.get_view(),
+          persp_matrix: *(self.camera.get_perspective().as_ref()),
+          view_matrix: *(self.camera.get_view().as_ref()),
         };
 
         // draw parameters
@@ -83,10 +84,6 @@ impl Engine {
     }
 
     pub fn process_keyboard(&mut self, pressed: bool, key: VirtualKeyCode) {
-        println!(
-            "{} key: {:#?}!",
-            if pressed { "Pressed" } else { "Released" },
-            key
-        );
+        self.camera.process_input(pressed, key);
     }
 }
