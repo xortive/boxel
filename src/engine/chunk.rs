@@ -34,8 +34,13 @@ impl Chunk {
             for z in 0..16 {
                 let world_x = x as f32 + origin.x;
                 let world_z = z as f32 + origin.z;
+                let color = (x + z) % 4;
+
+                println!("{} {} {}", x, z, color);
+                
                 self.blocks.push(Block {
                     position: (world_x as f32, 0., world_z as f32),
+                    color
                 })
             }
         }

@@ -3,9 +3,10 @@ use derive_more::{Constructor};
 #[derive(Copy, Clone, Constructor)]
 pub struct InstanceAttr {
     pub world_position: (f32, f32, f32),
+    pub color: (f32, f32, f32)
 }
 
-implement_vertex!(InstanceAttr, world_position);
+implement_vertex!(InstanceAttr, world_position, color);
 
 #[derive(Copy, Clone, Constructor)]
 pub struct Vertex {
