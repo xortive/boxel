@@ -9,6 +9,7 @@ pub struct CameraState {
     eye: Vec3,
     look: Vec3,
     up: Vec3,
+    move_velocity: Vec2,
     keys: Vec<VirtualKeyCode>,
 }
 
@@ -22,11 +23,13 @@ impl CameraState {
         let eye: Vec3 = vec3(8.0, 4.0, 8.0);
         let look = vec3(0.,0.,1.);
         let up = vec3(0.,1.,0.);
+        let move_velocity = vec2(0., 0.);
  
         CameraState {
             eye,
             look,
             up,
+            move_velocity,
             keys: Vec::new(),
         }
     }
@@ -51,7 +54,7 @@ impl CameraState {
             self.eye += ZOOM_SPEED * self.look;
         }
 
-        if self.keys.contains(&VirtualKeyCode::Up) {
+        if self.keys.contains(&VirtualKeyCode::Space) {
             self.eye += PAN_SPEED * self.up; 
         }
 
@@ -63,7 +66,7 @@ impl CameraState {
             self.eye -= ZOOM_SPEED * self.look;
         }
 
-        if self.keys.contains(&VirtualKeyCode::Down) {
+        if self.keys.contains(&VirtualKeyCode::LShift) || self.keys.contains(&VirtualKeyCode::RShift) {
             self.eye -= PAN_SPEED * self.up; 
         }
 
@@ -88,9 +91,11 @@ impl CameraState {
 
     pub fn process_cursor(&mut self, delta: (f64, f64), dt: Duration) {
         let angle = ROTATION_SPEED * dt.as_secs_f32();
+        let delta = vec2(delta.0 as f32, delta.1 as f32);
+        self.move_velocity = glm::lerp(&delta, &self.move_velocity, dt.as_secs_f32() / 30.);
 
-        let rotate_y = glm::quat_angle_axis(angle * delta.1 as f32, &-glm::cross(&self.look, &glm::vec3(0.,1.,0.)));
-        let rotate_x = glm::quat_angle_axis(angle * delta.0 as f32, &glm::vec3(0.,1.,0.));
+        let rotate_x = glm::quat_angle_axis(angle * self.move_velocity.x as f32, &glm::vec3(0.,1.,0.));
+        let rotate_y = glm::quat_angle_axis(angle * self.move_velocity.y as f32, &-glm::cross(&self.look, &glm::vec3(0.,1.,0.)));
 
         let rotate = rotate_x * rotate_y;
 
