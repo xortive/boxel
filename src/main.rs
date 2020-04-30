@@ -31,7 +31,6 @@ fn main() {
             std::time::Duration::from_nanos(16_666_667);
 
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
-
         use glium::glutin::{event, event_loop};
         match ev {
             /*
@@ -44,6 +43,9 @@ fn main() {
                     *control_flow = event_loop::ControlFlow::Exit;
                     return;
                 },
+                event::WindowEvent::CursorMoved { position, .. } => {
+                    engine.process_cursor((position.x, position.y));
+                }, 
                 event::WindowEvent::KeyboardInput { input, .. } => {
                     let pressed = input.state == event::ElementState::Pressed;
                     if let Some(key) = input.virtual_keycode {

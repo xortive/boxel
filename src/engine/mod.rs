@@ -98,6 +98,9 @@ impl Engine {
 
     pub fn process_keyboard(&mut self, pressed: bool, key: VirtualKeyCode) {
         self.camera.process_input(pressed, key);
-        println!("{:#?}", self.camera);
+    }
+
+    pub fn process_cursor(&mut self, position: (f64, f64)) {
+        self.camera.process_cursor(position);
     }
 }
