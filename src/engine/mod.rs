@@ -7,7 +7,7 @@ use glium::{program, uniform};
 use glium::{Display, Surface};
 
 use glm::{
-  vec2, Vec2
+  vec2, Vec2, vec3
 };
 
 mod block;
@@ -37,7 +37,10 @@ impl Engine {
 
         let cube = {
             let cube_vertices: Vec<Vertex> = Cube::new()
-                .vertex(|v| Vertex::new(v.pos.into(), v.normal.into()))
+                .vertex(|v| {
+                  let pos = vec3(v.pos.x, v.pos.y, v.pos.z).scale(0.5);
+                  Vertex::new(pos.into(), v.normal.into())}
+                )
                 .triangulate()
                 .vertices()
                 .collect();
