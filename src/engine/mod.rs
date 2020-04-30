@@ -6,11 +6,17 @@ use glium::vertex::VertexBuffer;
 use glium::{program, uniform};
 use glium::{Display, Surface};
 
+use glm::{
+  vec2, Vec2
+};
+
 mod block;
 mod chunk;
 
 use block::Block;
 use chunk::{Chunk, CHUNK_SIZE};
+
+use std::time::Duration;
 
 pub struct Engine {
     pub camera: CameraState,
@@ -18,6 +24,7 @@ pub struct Engine {
     cube: VertexBuffer<Vertex>,
     program: glium::Program,
     chunks: Vec<Chunk>,
+    grab: bool,
 }
 
 impl Engine {
@@ -44,7 +51,7 @@ impl Engine {
         // camera.set_direction((-0.5, -0.5, 0.));
 
         let mut chunks = Vec::new();
-        chunks.push(Chunk::new());
+        chunks.push(Chunk::new(vec2(0.,0.)));
 
         Engine {
             camera,
@@ -52,12 +59,16 @@ impl Engine {
             chunks,
             display,
             program,
+            grab: true
         }
     }
 
     pub fn render(&mut self) {
         let mut target = self.display.draw();
         target.clear_color_and_depth((0.529, 0.808, 0.980, 1.0), 1.0);
+
+        self.display.gl_window().window().set_cursor_grab(self.grab).unwrap();
+        self.display.gl_window().window().set_cursor_visible(!self.grab);
 
         self.camera.update();
 
@@ -96,11 +107,17 @@ impl Engine {
         target.finish().unwrap();
     }
 
-    pub fn process_keyboard(&mut self, pressed: bool, key: VirtualKeyCode) {
-        self.camera.process_input(pressed, key);
+    pub fn process_keyboard(&mut self, pressed: bool, key: VirtualKeyCode, dt: Duration) {
+        if key == VirtualKeyCode::Escape && pressed {
+          self.grab = !self.grab;
+        } else {
+          self.camera.process_input(pressed, key, dt);
+        }
     }
 
-    pub fn process_cursor(&mut self, position: (f64, f64)) {
-        self.camera.process_cursor(position);
+    pub fn process_cursor(&mut self, position: (f64, f64), dt: Duration) {
+      if (self.grab) {
+        self.camera.process_cursor(position, dt);
+      }
     }
-}
+  }
