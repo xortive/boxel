@@ -12,9 +12,9 @@ use glm::{
 
 mod block;
 mod chunk;
-
-use block::Block;
-use chunk::{Chunk, CHUNK_SIZE};
+mod world;
+mod generator;
+use world::World;
 
 use std::time::Duration;
 
@@ -23,7 +23,7 @@ pub struct Engine {
     pub display: Display,
     cube: VertexBuffer<Vertex>,
     program: glium::Program,
-    chunks: Vec<Chunk>,
+    world: World,
     grab: bool,
 }
 
@@ -50,18 +50,14 @@ impl Engine {
 
         let camera = CameraState::new();
 
-        // camera.set_position((10., 10., 0.));
-        // camera.set_direction((-0.5, -0.5, 0.));
-
-        let mut chunks = Vec::new();
-        chunks.push(Chunk::new(vec2(0.,0.)));
+        let world = World::new();
 
         Engine {
             camera,
             cube,
-            chunks,
             display,
             program,
+            world,
             grab: true
         }
     }
@@ -94,8 +90,12 @@ impl Engine {
         const INDICES: glium::index::NoIndices =
             glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-        for chunk in self.chunks.iter_mut() {
-            let instance = chunk.per_instance(&self.display);
+        let camera_pos = self.camera.get_position();
+
+        self.world.update_chunks(camera_pos, &self.display);
+
+        for chunk in self.world.rendered_chunks(camera_pos).iter() {
+            let instance = chunk.per_instance();
 
             target
                 .draw(
@@ -119,7 +119,7 @@ impl Engine {
     }
 
     pub fn process_cursor(&mut self, position: (f64, f64), dt: Duration) {
-      if (self.grab) {
+      if self.grab {
         self.camera.process_cursor(position, dt);
       }
     }

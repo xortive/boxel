@@ -6,6 +6,7 @@ use std::time::{Instant, Duration};
 mod primitives;
 mod engine;
 mod support;
+mod config;
 
 fn main() {
 
