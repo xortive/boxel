@@ -18,7 +18,13 @@ impl WorldGenerator for PlanarGenerator {
         let mut chunk = Chunk::new(coordinate);
         for x in 0..16 {
             for z in 0..16 {
-                chunk.add_block(glm::vec3(x as f32, 0., z as f32), BlockType::DIRT);
+                let block_type = match (x+z)%4 {
+                    std::i32::MIN..=0 => BlockType::DIRT,
+                    1 => BlockType::SAND,
+                    2 => BlockType::STONE,
+                    3..=std::i32::MAX => BlockType::GRASS,
+                };
+                chunk.add_block(glm::vec3(x as f32, 0., z as f32), block_type);
             }
         }
         chunk

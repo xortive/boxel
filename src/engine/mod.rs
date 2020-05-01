@@ -13,7 +13,7 @@ use glm::{
 mod block;
 mod chunk;
 mod world;
-mod generator;
+pub mod generator;
 use world::World;
 
 use std::time::Duration;
