@@ -1,10 +1,9 @@
-use crate::primitives::InstanceAttr;
 use crate::engine::block::{Block, BlockType};
+use crate::primitives::InstanceAttr;
 use glium::vertex::PerInstance;
 use glium::{Display, VertexBuffer};
 use glm::{vec2, vec3, Vec2, Vec3};
 use nalgebra::Point2;
-
 
 pub const CHUNK_SIZE: usize = 16;
 
@@ -35,7 +34,7 @@ impl Chunk {
         let world_space = origin + coordinate;
         self.blocks.push(Block {
             position: (world_space[0], world_space[1], world_space[2]),
-            block_type: block_type
+            block_type: block_type,
         });
     }
 
@@ -53,7 +52,7 @@ impl Chunk {
     //             let color = (x + z) % 4;
 
     //             println!("{} {} {}", x, z, color);
-                
+
     //             self.blocks.push(Block {
     //                 position: (world_x as f32, 0., world_z as f32),
     //                 color
@@ -64,7 +63,7 @@ impl Chunk {
 
     pub fn update_vbo(&mut self, display: &Display) {
         let instances: Vec<InstanceAttr> =
-                self.blocks.clone().into_iter().map(|b| b.into()).collect();
+            self.blocks.clone().into_iter().map(|b| b.into()).collect();
 
         println!("{} instances", instances.len());
 

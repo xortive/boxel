@@ -6,14 +6,12 @@ use glium::vertex::VertexBuffer;
 use glium::{program, uniform};
 use glium::{Display, Surface};
 
-use glm::{
-  vec2, Vec2, vec3
-};
+use glm::{vec2, vec3, Vec2};
 
 mod block;
 mod chunk;
-mod world;
 pub mod generator;
+mod world;
 use world::World;
 
 use std::time::Duration;
@@ -38,9 +36,9 @@ impl Engine {
         let cube = {
             let cube_vertices: Vec<Vertex> = Cube::new()
                 .vertex(|v| {
-                  let pos = vec3(v.pos.x, v.pos.y, v.pos.z).scale(0.5);
-                  Vertex::new(pos.into(), v.normal.into())}
-                )
+                    let pos = vec3(v.pos.x, v.pos.y, v.pos.z).scale(0.5);
+                    Vertex::new(pos.into(), v.normal.into())
+                })
                 .triangulate()
                 .vertices()
                 .collect();
@@ -58,7 +56,7 @@ impl Engine {
             display,
             program,
             world,
-            grab: true
+            grab: true,
         }
     }
 
@@ -66,8 +64,15 @@ impl Engine {
         let mut target = self.display.draw();
         target.clear_color_and_depth((0.529, 0.808, 0.980, 1.0), 1.0);
 
-        self.display.gl_window().window().set_cursor_grab(self.grab).unwrap();
-        self.display.gl_window().window().set_cursor_visible(!self.grab);
+        self.display
+            .gl_window()
+            .window()
+            .set_cursor_grab(self.grab)
+            .unwrap();
+        self.display
+            .gl_window()
+            .window()
+            .set_cursor_visible(!self.grab);
 
         self.camera.update();
 
@@ -112,15 +117,15 @@ impl Engine {
 
     pub fn process_keyboard(&mut self, pressed: bool, key: VirtualKeyCode, dt: Duration) {
         if key == VirtualKeyCode::Escape && pressed {
-          self.grab = !self.grab;
+            self.grab = !self.grab;
         } else {
-          self.camera.process_input(pressed, key, dt);
+            self.camera.process_input(pressed, key, dt);
         }
     }
 
     pub fn process_cursor(&mut self, position: (f64, f64), dt: Duration) {
-      if self.grab {
-        self.camera.process_cursor(position, dt);
-      }
+        if self.grab {
+            self.camera.process_cursor(position, dt);
+        }
     }
-  }
+}

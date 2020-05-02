@@ -1,5 +1,5 @@
-use crate::engine::chunk::{Chunk, ChunkCoordinate};
 use crate::engine::block::BlockType;
+use crate::engine::chunk::{Chunk, ChunkCoordinate};
 
 pub trait WorldGenerator {
     fn generate(&self, coordinate: ChunkCoordinate) -> Chunk;
@@ -18,7 +18,7 @@ impl WorldGenerator for PlanarGenerator {
         let mut chunk = Chunk::new(coordinate);
         for x in 0..16 {
             for z in 0..16 {
-                let block_type = match (x+z)%4 {
+                let block_type = match (x + z) % 4 {
                     std::i32::MIN..=0 => BlockType::DIRT,
                     1 => BlockType::SAND,
                     2 => BlockType::STONE,
@@ -31,9 +31,7 @@ impl WorldGenerator for PlanarGenerator {
     }
 }
 
-pub struct PerlinGenerator {
-
-}
+pub struct PerlinGenerator {}
 
 impl WorldGenerator for PerlinGenerator {
     fn generate(&self, coordinate: ChunkCoordinate) -> Chunk {

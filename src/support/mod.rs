@@ -3,11 +3,11 @@
 extern crate genmesh;
 extern crate obj;
 
-use std::time::{Duration, Instant};
-use glium::{implement_vertex, Display};
-use glium::vertex::VertexBufferAny;
-use glium::glutin::event_loop::{EventLoop, ControlFlow};
 use glium::glutin::event::{Event, StartCause};
+use glium::glutin::event_loop::{ControlFlow, EventLoop};
+use glium::vertex::VertexBufferAny;
+use glium::{implement_vertex, Display};
+use std::time::{Duration, Instant};
 
 pub mod camera;
 
@@ -16,18 +16,17 @@ pub enum Action {
     Continue,
 }
 
-pub fn start_loop<F>(event_loop: EventLoop<()>, mut callback: F)->! where F: 'static + FnMut(&Vec<Event<()>>) -> Action {
+pub fn start_loop<F>(event_loop: EventLoop<()>, mut callback: F) -> !
+where
+    F: 'static + FnMut(&Vec<Event<()>>) -> Action,
+{
     let mut events_buffer = Vec::new();
     let mut next_frame_time = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         let run_callback = match event.to_static() {
-            Some(Event::NewEvents(cause)) => {
-                match cause {
-                    StartCause::ResumeTimeReached { .. } | StartCause::Init => {
-                        true
-                    },
-                    _ => false
-                }
+            Some(Event::NewEvents(cause)) => match cause {
+                StartCause::ResumeTimeReached { .. } | StartCause::Init => true,
+                _ => false,
             },
             Some(event) => {
                 events_buffer.push(event);
@@ -36,7 +35,7 @@ pub fn start_loop<F>(event_loop: EventLoop<()>, mut callback: F)->! where F: 'st
             None => {
                 // Ignore this event.
                 false
-            },
+            }
         };
 
         let action = if run_callback {
@@ -53,8 +52,8 @@ pub fn start_loop<F>(event_loop: EventLoop<()>, mut callback: F)->! where F: 'st
         match action {
             Action::Continue => {
                 *control_flow = ControlFlow::WaitUntil(next_frame_time);
-            },
-            Action::Stop => *control_flow = ControlFlow::Exit
+            }
+            Action::Stop => *control_flow = ControlFlow::Exit,
         }
     })
 }
@@ -78,7 +77,11 @@ pub fn load_wavefront(display: &Display, data: &[u8]) -> VertexBufferAny {
     for object in data.objects.iter() {
         for polygon in object.groups.iter().flat_map(|g| g.polys.iter()) {
             match polygon {
-                &genmesh::Polygon::PolyTri(genmesh::Triangle { x: v1, y: v2, z: v3 }) => {
+                &genmesh::Polygon::PolyTri(genmesh::Triangle {
+                    x: v1,
+                    y: v2,
+                    z: v3,
+                }) => {
                     for v in [v1, v2, v3].iter() {
                         let position = data.position[v.0];
                         let texture = v.1.map(|index| data.texture[index]);
@@ -93,11 +96,13 @@ pub fn load_wavefront(display: &Display, data: &[u8]) -> VertexBufferAny {
                             texture: texture,
                         })
                     }
-                },
-                _ => unimplemented!()
+                }
+                _ => unimplemented!(),
             }
         }
     }
 
-    glium::vertex::VertexBuffer::new(display, &vertex_data).unwrap().into()
+    glium::vertex::VertexBuffer::new(display, &vertex_data)
+        .unwrap()
+        .into()
 }

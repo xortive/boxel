@@ -1,26 +1,29 @@
-use crate::engine::generator::{WorldGenerator, PlanarGenerator};
-use crate::engine::chunk::{ChunkCoordinate, Chunk, CHUNK_SIZE};
-use glium::{Display};
-use nalgebra::Point2;
 use crate::config::RENDER_DISTANCE;
+use crate::engine::chunk::{Chunk, ChunkCoordinate, CHUNK_SIZE};
+use crate::engine::generator::{PlanarGenerator, WorldGenerator};
+use glium::Display;
 use glm::Vec3;
+use nalgebra::Point2;
 use std::collections::HashMap;
 
 pub struct World {
-   generator: Box<dyn WorldGenerator>,
-   chunks: HashMap<ChunkCoordinate, Chunk>
+    generator: Box<dyn WorldGenerator>,
+    chunks: HashMap<ChunkCoordinate, Chunk>,
 }
 
 impl World {
     pub fn new() -> World {
         World {
             generator: Box::new(PlanarGenerator::new()),
-            chunks: HashMap::new()
+            chunks: HashMap::new(),
         }
     }
 
     fn convert_to_chunk(&self, position: &Vec3) -> ChunkCoordinate {
-        Point2::new((position[0] / CHUNK_SIZE as f32) as i32, (position[2] / CHUNK_SIZE as f32) as i32)
+        Point2::new(
+            (position[0] / CHUNK_SIZE as f32) as i32,
+            (position[2] / CHUNK_SIZE as f32) as i32,
+        )
         // glm::vec2((position[0] / CHUNK_SIZE as f32).floor(), (position[2] / CHUNK_SIZE as f32).floor())
     }
 
@@ -28,7 +31,6 @@ impl World {
         let chunk_coord = self.convert_to_chunk(&position);
         for x in -RENDER_DISTANCE..RENDER_DISTANCE {
             for z in -RENDER_DISTANCE..RENDER_DISTANCE {
-
                 let current_chunk = Point2::new(chunk_coord[0] + x, chunk_coord[1] + z);
 
                 if !self.chunks.contains_key(&current_chunk) {

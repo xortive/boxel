@@ -1,9 +1,9 @@
+use derive_more::Constructor;
 use glium::implement_vertex;
-use derive_more::{Constructor};
 #[derive(Copy, Clone, Constructor)]
 pub struct InstanceAttr {
     pub world_position: (f32, f32, f32),
-    pub color: (f32, f32, f32)
+    pub color: (f32, f32, f32),
 }
 
 implement_vertex!(InstanceAttr, world_position, color);

@@ -1,6 +1,6 @@
 use glium::glutin::event::VirtualKeyCode;
+use glm::{vec2, vec3, vec4, Mat4, Vec2, Vec3, Vec4};
 use nalgebra_glm as glm;
-use glm::{Vec2, Vec3, Vec4, vec2, vec3, vec4, Mat4};
 
 use std::time::Duration;
 
@@ -21,10 +21,10 @@ const ROTATION_SPEED: f32 = 0.05;
 impl CameraState {
     pub fn new() -> CameraState {
         let eye: Vec3 = vec3(8.0, 4.0, 8.0);
-        let look = vec3(0.,0.,1.);
-        let up = vec3(0.,1.,0.);
+        let look = vec3(0., 0., 1.);
+        let up = vec3(0., 1., 0.);
         let move_velocity = vec2(0., 0.);
- 
+
         CameraState {
             eye,
             look,
@@ -39,16 +39,16 @@ impl CameraState {
         let fov: f32 = 3.141592 / 2.0;
         let zfar = 1024.0;
         let znear = 1.0;
-        
+
         return glm::perspective_lh(aspect, fov, znear, zfar);
     }
 
     pub fn get_view(&self) -> Mat4 {
-        glm::look_at(&self.eye, &(self.eye-self.look), &self.up)
+        glm::look_at(&self.eye, &(self.eye - self.look), &self.up)
     }
 
     pub fn get_position(&self) -> &Vec3 {
-       &self.eye 
+        &self.eye
     }
 
     pub fn update(&mut self) {
@@ -59,7 +59,7 @@ impl CameraState {
         }
 
         if self.keys.contains(&VirtualKeyCode::Space) {
-            self.eye += PAN_SPEED * self.up; 
+            self.eye += PAN_SPEED * self.up;
         }
 
         if self.keys.contains(&VirtualKeyCode::A) {
@@ -70,8 +70,10 @@ impl CameraState {
             self.eye -= ZOOM_SPEED * self.look;
         }
 
-        if self.keys.contains(&VirtualKeyCode::LShift) || self.keys.contains(&VirtualKeyCode::RShift) {
-            self.eye -= PAN_SPEED * self.up; 
+        if self.keys.contains(&VirtualKeyCode::LShift)
+            || self.keys.contains(&VirtualKeyCode::RShift)
+        {
+            self.eye -= PAN_SPEED * self.up;
         }
 
         if self.keys.contains(&VirtualKeyCode::D) {
@@ -89,7 +91,7 @@ impl CameraState {
         if pressed {
             self.keys.push(key);
         } else {
-            self.keys.retain(|&x| { x != key });
+            self.keys.retain(|&x| x != key);
         }
     }
 
@@ -98,8 +100,12 @@ impl CameraState {
         let delta = vec2(delta.0 as f32, delta.1 as f32);
         self.move_velocity = glm::lerp(&delta, &self.move_velocity, dt.as_secs_f32() / 30.);
 
-        let rotate_x = glm::quat_angle_axis(angle * self.move_velocity.x as f32, &glm::vec3(0.,1.,0.));
-        let rotate_y = glm::quat_angle_axis(angle * self.move_velocity.y as f32, &-glm::cross(&self.look, &glm::vec3(0.,1.,0.)));
+        let rotate_x =
+            glm::quat_angle_axis(angle * self.move_velocity.x as f32, &glm::vec3(0., 1., 0.));
+        let rotate_y = glm::quat_angle_axis(
+            angle * self.move_velocity.y as f32,
+            &-glm::cross(&self.look, &glm::vec3(0., 1., 0.)),
+        );
 
         let rotate = rotate_x * rotate_y;
 
