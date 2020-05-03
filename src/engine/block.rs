@@ -1,4 +1,3 @@
-#![feature(clamp)]
 use crate::primitives::InstanceAttr;
 
 #[derive(Clone, Debug)]
