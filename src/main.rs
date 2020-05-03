@@ -1,4 +1,4 @@
-use glium::{glutin, Surface};
+use glium::glutin;
 extern crate nalgebra_glm as glm;
 
 use std::time::{Duration, Instant};
@@ -20,7 +20,7 @@ fn main() {
         .with_vsync(true);
 
     let display = glium::Display::new(window, context, &event_loop).unwrap();
-    let scale_factor = display.gl_window().window().scale_factor();
+    let _scale_factor = display.gl_window().window().scale_factor();
 
     let mut engine = engine::Engine::new(display);
 

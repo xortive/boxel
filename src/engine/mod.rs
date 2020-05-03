@@ -1,4 +1,4 @@
-use crate::primitives::{InstanceAttr, Vertex};
+use crate::primitives::Vertex;
 use crate::support::camera::CameraState;
 use genmesh::{self, generators::Cube, MapToVertices, Triangulate, Vertices};
 use glium::glutin::event::VirtualKeyCode;
@@ -6,7 +6,7 @@ use glium::vertex::VertexBuffer;
 use glium::{program, uniform};
 use glium::{Display, Surface};
 
-use glm::{vec2, vec3, Vec2};
+use glm::vec3;
 
 mod block;
 mod chunk;

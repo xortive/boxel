@@ -2,7 +2,7 @@ use crate::engine::block::{Block, BlockType};
 use crate::primitives::InstanceAttr;
 use glium::vertex::PerInstance;
 use glium::{Display, VertexBuffer};
-use glm::{vec2, vec3, Vec2, Vec3};
+use glm::{vec3, Vec3};
 use nalgebra::Point2;
 
 pub const CHUNK_SIZE: usize = 16;
@@ -18,7 +18,7 @@ pub struct Chunk {
 
 impl Chunk {
     pub fn new(coordinates: ChunkCoordinate) -> Chunk {
-        let mut c = Chunk {
+        let c = Chunk {
             coordinates,
             blocks: Vec::new(),
             vbo: None,
