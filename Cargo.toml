@@ -17,3 +17,4 @@ wavefront_obj = "7.0.0"
 derive_more = "0.99.5"
 rand = "0.7.3"
 obj = { version="0.9.1", features=["genmesh"] }
+noise = "0.6.0"

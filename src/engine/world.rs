@@ -1,6 +1,6 @@
 use crate::config::RENDER_DISTANCE;
 use crate::engine::chunk::{Chunk, ChunkCoordinate, CHUNK_SIZE};
-use crate::engine::generator::{PlanarGenerator, WorldGenerator};
+use crate::engine::generator::{PerlinGenerator, WorldGenerator};
 use glium::Display;
 use glm::Vec3;
 use nalgebra::Point2;
@@ -14,7 +14,7 @@ pub struct World {
 impl World {
     pub fn new() -> World {
         World {
-            generator: Box::new(PlanarGenerator::new()),
+            generator: Box::new(PerlinGenerator::new()),
             chunks: HashMap::new(),
         }
     }
