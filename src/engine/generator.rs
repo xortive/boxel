@@ -71,19 +71,19 @@ impl WorldGenerator for PerlinGenerator {
                 //println!("u32 y was {}", y);
 
                 // println!("pos: {:#?} y: {:?}", block_world, y);
-                chunk.add_block(vec3(x, y, z), self.get_block(y));
+                chunk.add_block_with_visibility(vec3(x, y, z), self.get_block(y), true);
                 
                 let mut i = 1;
                 for _ in y..0 {
                     //println!("Adding water {} {}", i, y);
-                    chunk.add_block(vec3(x, y + i, z), BlockType::WATER);
+                    chunk.add_block_with_visibility(vec3(x, y + i, z), BlockType::WATER, true);
                     i += 1;
                 }
 
                 i = 1;
                 for _ in 0..y {
                     //println!("Adding stone {} {}", i, y);
-                    chunk.add_block(vec3(x, y - i, z), BlockType::STONE);
+                    chunk.add_block_with_visibility(vec3(x, y - i, z), BlockType::STONE, false);
                     i += 1;
                 }
             }

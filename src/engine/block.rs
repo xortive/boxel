@@ -10,6 +10,14 @@ pub enum BlockType {
     STONE,
     WATER,
 }
+pub enum BlockFace {
+    Front,
+    Right,
+    Back,
+    Left,
+    Top,
+    Bottom,
+}
 
 impl BlockType {
     fn color(&self) -> (f32, f32, f32, f32) {
@@ -47,6 +55,7 @@ impl Block {
 pub struct BlockProperties {
     pub block_type: BlockType,
 }
+
 
 impl Into<InstanceAttr> for Block {
     fn into(self) -> InstanceAttr {

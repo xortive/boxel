@@ -29,17 +29,23 @@ impl World {
 
     pub fn update_chunks(&mut self, position: &Vec3, display: &Display) {
         let chunk_coord = self.convert_to_chunk(&position);
+        let mut count = 0;
         for x in -RENDER_DISTANCE..RENDER_DISTANCE {
             for z in -RENDER_DISTANCE..RENDER_DISTANCE {
                 let current_chunk = IVec2::new(chunk_coord[0] + x, chunk_coord[1] + z);
 
                 if !self.chunks.contains_key(&current_chunk) {
-                    println!("Generating chunk {}", current_chunk);
+                    count += 1;
+                    //println!("Generating chunk {}", current_chunk);
                     let mut chunk = self.generator.generate(current_chunk);
+                    //println!("Getting chunk vbo {}", current_chunk);
                     chunk.update_vbo(display);
                     self.chunks.insert(current_chunk, chunk);
                 }
             }
+        }
+        if count > 0 {
+            println!("generated {} chunks", count);
         }
     }
 
