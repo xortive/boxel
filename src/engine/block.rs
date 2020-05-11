@@ -6,15 +6,17 @@ pub enum BlockType {
     SAND,
     DIRT,
     STONE,
+    WATER,
 }
 
 impl BlockType {
-    fn color(&self) -> (f32, f32, f32) {
+    fn color(&self) -> (f32, f32, f32, f32) {
         match *self {
-            BlockType::GRASS => (53. / 255., 170. / 255., 70. / 255.),
-            BlockType::SAND => (223. / 255., 223. / 255., 160. / 255.),
-            BlockType::DIRT => (94. / 255., 227. / 255., 230. / 255.),
-            BlockType::STONE => (170. / 255., 170. / 255., 185. / 255.),
+            BlockType::GRASS => (53. / 255., 170. / 255., 70. / 255., 1.),
+            BlockType::SAND => (223. / 255., 223. / 255., 160. / 255., 1.),
+            BlockType::DIRT => (94. / 255., 227. / 255., 230. / 255., 1.),
+            BlockType::STONE => (170. / 255., 170. / 255., 185. / 255., 1.),
+            BlockType::WATER => (64. / 255., 164. / 255., 223. / 255., 0.5),
         }
     }
 }

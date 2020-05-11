@@ -89,6 +89,7 @@ impl Engine {
                 write: true,
                 ..Default::default()
             },
+            blend: glium::draw_parameters::Blend::alpha_blending(),
             ..Default::default()
         };
 

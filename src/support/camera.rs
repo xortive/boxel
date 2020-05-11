@@ -1,6 +1,7 @@
 use glium::glutin::event::VirtualKeyCode;
 use glm::{vec2, vec3, Mat4, Vec2, Vec3};
 use nalgebra_glm as glm;
+use crate::config::HEIGHT_OFFSET;
 
 use std::time::Duration;
 
@@ -20,7 +21,7 @@ const ROTATION_SPEED: f32 = 0.05;
 
 impl CameraState {
     pub fn new() -> CameraState {
-        let eye: Vec3 = vec3(8.0, 4.0, 8.0);
+        let eye: Vec3 = vec3(8.0, 4.0 + HEIGHT_OFFSET as f32, 8.0);
         let look = vec3(0., 0., 1.);
         let up = vec3(0., 1., 0.);
         let move_velocity = vec2(0., 0.);

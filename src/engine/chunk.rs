@@ -4,6 +4,7 @@ use glium::vertex::PerInstance;
 use glium::{Display, VertexBuffer};
 use glm::{vec3, Vec3};
 use nalgebra::Point2;
+use crate::config::HEIGHT_OFFSET;
 
 pub const CHUNK_SIZE: usize = 16;
 
@@ -33,7 +34,7 @@ impl Chunk {
 
         let world_space = origin + coordinate;
         self.blocks.push(Block {
-            position: (world_space[0], world_space[1], world_space[2]),
+            position: (world_space[0], world_space[1] + (HEIGHT_OFFSET as f32), world_space[2]),
             block_type: block_type,
         });
     }
