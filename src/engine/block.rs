@@ -1,6 +1,8 @@
 use crate::primitives::InstanceAttr;
+use super::types::*;
+use std::convert::AsRef;
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum BlockType {
     GRASS,
     SAND,
@@ -21,17 +23,36 @@ impl BlockType {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct Block {
-    pub position: (f32, f32, f32),
+#[derive(Clone, Debug)] pub struct Block {
+    pub position: WorldCoordinate,
+    properties: BlockProperties,
+}
+
+impl AsRef<BlockProperties> for Block {
+    fn as_ref(&self) -> &BlockProperties {
+        &self.properties
+    }
+}
+
+impl Block {
+    pub fn new(position: WorldCoordinate, properties: BlockProperties) -> Block {
+        Block {
+            position,
+            properties
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct BlockProperties {
     pub block_type: BlockType,
 }
 
 impl Into<InstanceAttr> for Block {
     fn into(self) -> InstanceAttr {
         InstanceAttr {
-            world_position: self.position,
-            color: self.block_type.color(),
+            world_position: (self.position.x as f32, self.position.y as f32, self.position.z as f32),
+            color: self.properties.block_type.color(),
         }
     }
 }

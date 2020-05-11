@@ -35,7 +35,7 @@ fn main() {
         last_frame = now;
 
         let fps = 1.0 / delta_time.as_secs_f32();
-        if fps < 50.0 {
+        if fps < 60.0 {
             println!("FPS: {}/s", 1.0 / delta_time.as_secs_f32());
         }
 

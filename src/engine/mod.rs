@@ -8,11 +8,13 @@ use glium::{Display, Surface};
 
 use glm::vec3;
 
+mod types;
 mod block;
 mod chunk;
 pub mod generator;
 mod world;
 use world::World;
+
 
 use std::time::Duration;
 
@@ -113,6 +115,7 @@ impl Engine {
                 )
                 .unwrap();
         }
+
         target.finish().unwrap();
     }
 

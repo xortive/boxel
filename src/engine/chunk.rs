@@ -1,19 +1,15 @@
-use crate::engine::block::{Block, BlockType};
+use crate::config::*;
+use super::block::{Block, BlockProperties, BlockType};
+use super::types::*;
 use crate::primitives::InstanceAttr;
 use glium::vertex::PerInstance;
 use glium::{Display, VertexBuffer};
-use glm::{vec3, Vec3};
-use nalgebra::Point2;
-use crate::config::HEIGHT_OFFSET;
-
-pub const CHUNK_SIZE: usize = 16;
-
-pub type ChunkCoordinate = Point2<i32>; // chunk space
-pub type BlockCoordinate = Vec3; // block space in a chunk (CHUNK_LENGTH x CHUNK_WIDTH x CHUNK_HEIGHT)
+use glm::{vec3, UVec3, IVec3};
 
 pub struct Chunk {
     coordinates: ChunkCoordinate, //in chunk space, so (0, 0) is the chunk from worldspace (0,y,0) to (16,y,16);
-    blocks: Vec<Block>,
+    //blocks[x][z][y]
+    blocks: [[[Option<BlockProperties>; CHUNK_HEIGHT as usize]; CHUNK_SIZE as usize]; CHUNK_SIZE as usize],
     vbo: Option<VertexBuffer<InstanceAttr>>,
 }
 
@@ -21,7 +17,7 @@ impl Chunk {
     pub fn new(coordinates: ChunkCoordinate) -> Chunk {
         let c = Chunk {
             coordinates,
-            blocks: Vec::new(),
+            blocks: [[[None; CHUNK_HEIGHT as usize]; CHUNK_SIZE as usize]; CHUNK_SIZE as usize],
             vbo: None,
         };
         // c.add_plane();
@@ -29,42 +25,27 @@ impl Chunk {
     }
 
     pub fn add_block(&mut self, coordinate: BlockCoordinate, block_type: BlockType) {
-        // first, convert to world space
-        let origin = self.world_origin();
-
-        let world_space = origin + coordinate;
-        self.blocks.push(Block {
-            position: (world_space[0], world_space[1] + (HEIGHT_OFFSET as f32), world_space[2]),
-            block_type: block_type,
-        });
+        //println!("coords {:?}", coordinate);
+        self.blocks[coordinate.x as usize][coordinate.z as usize][coordinate.y as usize] = Some(BlockProperties { block_type });
     }
 
-    pub fn world_origin(&self) -> Vec3 {
-        let world = self.coordinates * 16;
-        vec3(world[0] as f32, 0., world[1] as f32)
+    pub fn world_origin(&self) -> WorldCoordinate {
+        let world = self.coordinates * CHUNK_SIZE as i32;
+        vec3(world[0], 0, world[1])
     }
-
-    // pub fn add_plane(&mut self) {
-    //     let origin = self.world_origin();
-    //     for x in 0..16 {
-    //         for z in 0..16 {
-    //             let world_x = x as f32 + origin.x;
-    //             let world_z = z as f32 + origin.z;
-    //             let color = (x + z) % 4;
-
-    //             println!("{} {} {}", x, z, color);
-
-    //             self.blocks.push(Block {
-    //                 position: (world_x as f32, 0., world_z as f32),
-    //                 color
-    //             })
-    //         }
-    //     }
-    // }
 
     pub fn update_vbo(&mut self, display: &Display) {
-        let instances: Vec<InstanceAttr> =
-            self.blocks.clone().into_iter().map(|b| b.into()).collect();
+        let mut instances: Vec<InstanceAttr> = Vec::new();
+        for x in 0..CHUNK_SIZE as usize {
+            for z in 0..CHUNK_SIZE as usize {
+                for y in 0..CHUNK_HEIGHT as usize {
+                    if let Some(props) = self.blocks[x][z][y] {
+                        let pos = self.world_origin() + vec3(x as i32, y as i32, z as i32);
+                        instances.push(Block::new(pos, props).into());
+                    }
+                }
+            }
+        }
 
         println!("{} instances", instances.len());
 
