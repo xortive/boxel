@@ -28,7 +28,7 @@ impl WorldGenerator for PlanarGenerator {
                     2 => BlockType::STONE,
                     3..=std::i32::MAX => BlockType::GRASS,
                 };
-                chunk.add_block(glm::vec3(x as f32, 0., z as f32), block_type);
+                // chunk.add_block(glm::vec3(x as f32, 0., z as f32), block_type);
             }
         }
         chunk
@@ -49,7 +49,6 @@ impl PerlinGenerator {
     }
 
     fn get_block(&self, y: i32) -> BlockType {
-        println!("{}", y);
         match y {
             std::i32::MIN..=0 => BlockType::SAND,
             1..=12 => BlockType::GRASS,
@@ -61,25 +60,25 @@ impl PerlinGenerator {
 impl WorldGenerator for PerlinGenerator {
     fn generate(&self, coordinate: ChunkCoordinate) -> Chunk {
         let mut chunk = Chunk::new(coordinate);
-        let chunk_world: glm::TVec2<f64> = glm::convert(chunk.world_origin().xz());
+        let chunk_world: glm::TVec2<f64> = vec2(chunk.world_origin()[0] as f64, chunk.world_origin()[2] as f64);
         for x in 0..16 {
             for z in 0..16 {
                 let block_world: [f64; 2] = ((chunk_world + vec2(x as f64, z as f64)) * 0.015).into();
                 let y: i32 = (self.perlin.get(block_world).powi(3) * 16. as f64) as i32;
                 // println!("pos: {:#?} y: {:?}", block_world, y);
-                chunk.add_block(glm::vec3(x as f32, y as f32, z as f32), self.get_block(y));
+                chunk.add_block([x, y, z].into(), self.get_block(y));
                 
                 let mut i = 1;
                 for _ in y..-1 {
-                    println!("Adding water");
-                    chunk.add_block(glm::vec3(x as f32, (y + i) as f32, z as f32), BlockType::WATER);
+                    // println!("Adding water");
+                    chunk.add_block([x, (y + i), z].into(), BlockType::WATER);
                     i += 1;
                 }
 
                 let min_y = -HEIGHT_OFFSET;
                 i = 1;
                 for _ in min_y..y - 1 {
-                    chunk.add_block(glm::vec3(x as f32, (y - i) as f32, z as f32), BlockType::STONE);
+                    chunk.add_block([x, (y - i), z].into(), BlockType::STONE);
                     i += 1;
                 }
             }

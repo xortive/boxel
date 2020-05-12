@@ -1,6 +1,6 @@
 use crate::primitives::InstanceAttr;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum BlockType {
     GRASS,
     SAND,
@@ -16,7 +16,7 @@ impl BlockType {
             BlockType::SAND => (223. / 255., 223. / 255., 160. / 255., 1.),
             BlockType::DIRT => (94. / 255., 227. / 255., 230. / 255., 1.),
             BlockType::STONE => (170. / 255., 170. / 255., 185. / 255., 1.),
-            BlockType::WATER => (64. / 255., 164. / 255., 223. / 255., 0.5),
+            BlockType::WATER => (64. / 255., 164. / 255., 223. / 255., 0.95),
         }
     }
 }

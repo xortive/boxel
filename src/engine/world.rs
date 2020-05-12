@@ -29,13 +29,14 @@ impl World {
 
     pub fn update_chunks(&mut self, position: &Vec3, display: &Display) {
         let chunk_coord = self.convert_to_chunk(&position);
-        for x in -RENDER_DISTANCE..RENDER_DISTANCE {
-            for z in -RENDER_DISTANCE..RENDER_DISTANCE {
+        for x in -RENDER_DISTANCE..=RENDER_DISTANCE {
+            for z in -RENDER_DISTANCE..=RENDER_DISTANCE {
                 let current_chunk = Point2::new(chunk_coord[0] + x, chunk_coord[1] + z);
 
                 if !self.chunks.contains_key(&current_chunk) {
                     println!("Generating chunk {}", current_chunk);
                     let mut chunk = self.generator.generate(current_chunk);
+                    chunk.update_visible();
                     chunk.update_vbo(display);
                     self.chunks.insert(current_chunk, chunk);
                 }
@@ -46,8 +47,8 @@ impl World {
     pub fn rendered_chunks(&self, position: &Vec3) -> Vec<&Chunk> {
         let chunk_coord = self.convert_to_chunk(&position);
         let mut output = Vec::new();
-        for x in -RENDER_DISTANCE..RENDER_DISTANCE {
-            for z in -RENDER_DISTANCE..RENDER_DISTANCE {
+        for x in -RENDER_DISTANCE..=RENDER_DISTANCE {
+            for z in -RENDER_DISTANCE..=RENDER_DISTANCE {
                 let current_chunk = Point2::new(chunk_coord[0] + x, chunk_coord[1] + z);
                 output.push(self.chunks.get(&current_chunk).unwrap())
             }
