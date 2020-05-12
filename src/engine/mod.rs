@@ -10,9 +10,11 @@ use glm::vec3;
 
 mod block;
 mod chunk;
+mod crosshair;
 pub mod generator;
 mod world;
 use world::World;
+use crosshair::Crosshair;
 
 use std::time::Duration;
 
@@ -23,6 +25,8 @@ pub struct Engine {
     program: glium::Program,
     world: World,
     grab: bool,
+    crosshair: Crosshair,
+    crosshair_program: glium::Program,
 }
 
 impl Engine {
@@ -30,6 +34,11 @@ impl Engine {
         // the program
         let program = program!(&display,
             140 => {vertex: include_str!("./../shaders/vertex.glsl"), fragment: include_str!("./../shaders/fragment.glsl")},
+        )
+        .unwrap();
+
+        let crosshair_program = program!(&display,
+            140 => {vertex: include_str!("./../shaders/crosshair_vertex.glsl"), fragment: include_str!("./../shaders/crosshair_fragment.glsl")},
         )
         .unwrap();
 
@@ -50,6 +59,8 @@ impl Engine {
 
         let world = World::new();
 
+        let crosshair = Crosshair::new(&display);
+
         Engine {
             camera,
             cube,
@@ -57,6 +68,8 @@ impl Engine {
             program,
             world,
             grab: true,
+            crosshair,
+            crosshair_program,
         }
     }
 
@@ -90,6 +103,7 @@ impl Engine {
                 ..Default::default()
             },
             blend: glium::draw_parameters::Blend::alpha_blending(),
+            // backface_culling: glium::draw_parameters::BackfaceCullingMode::CullClockwise,
             ..Default::default()
         };
 
@@ -113,6 +127,9 @@ impl Engine {
                 )
                 .unwrap();
         }
+
+        target.draw(&self.crosshair.vbo, &glium::index::NoIndices(glium::index::PrimitiveType::LinesList), &self.crosshair_program, &glium::uniforms::EmptyUniforms, &Default::default()).unwrap();
+        
         target.finish().unwrap();
     }
 

@@ -15,9 +15,9 @@ pub struct CameraState {
 }
 
 const CAMERA_DISTANCE: f32 = 10.0;
-const ZOOM_SPEED: f32 = 0.1;
-const PAN_SPEED: f32 = 0.1;
-const ROTATION_SPEED: f32 = 0.05;
+const ZOOM_SPEED: f32 = 0.05;
+const PAN_SPEED: f32 = 0.05;
+const ROTATION_SPEED: f32 = 1000.;
 
 impl CameraState {
     pub fn new() -> CameraState {
@@ -97,9 +97,11 @@ impl CameraState {
     }
 
     pub fn process_cursor(&mut self, delta: (f64, f64), dt: Duration) {
+        // println!("Process {} {} {} {}", dt.as_millis(), dt.as_secs_f32(), dt.as_nanos(), dt.as_micros());
         let angle = ROTATION_SPEED * dt.as_secs_f32();
         let delta = vec2(delta.0 as f32, delta.1 as f32);
-        self.move_velocity = glm::lerp(&delta, &self.move_velocity, dt.as_secs_f32() / 30.);
+        self.move_velocity = glm::lerp(&delta, &self.move_velocity, 0.5);
+        // println!("Angle {}  Move {}", angle, self.move_velocity);
 
         let rotate_x =
             glm::quat_angle_axis(angle * self.move_velocity.x as f32, &glm::vec3(0., 1., 0.));

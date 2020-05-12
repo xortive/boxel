@@ -16,8 +16,8 @@ fn main() {
         .with_title("Boxel");
 
     let context = glutin::ContextBuilder::new()
-        .with_depth_buffer(24) //bits
-        .with_vsync(true);
+        .with_depth_buffer(24); //bits
+        // .with_vsync(true);
 
     let display = glium::Display::new(window, context, &event_loop).unwrap();
     let _scale_factor = display.gl_window().window().scale_factor();
@@ -27,7 +27,6 @@ fn main() {
     let mut last_frame = Instant::now();
 
     event_loop.run(move |ev, _, control_flow| {
-        engine.render();
 
         let now = Instant::now();
         let delta_time = now - last_frame;
@@ -68,5 +67,6 @@ fn main() {
             },
             _ => (),
         }
+        engine.render();
     });
 }

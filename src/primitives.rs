@@ -9,6 +9,13 @@ pub struct InstanceAttr {
 implement_vertex!(InstanceAttr, world_position, color);
 
 #[derive(Copy, Clone, Constructor)]
+pub struct CrosshairVertex {
+    pub screen_position: [f32; 2],
+}
+
+implement_vertex!(CrosshairVertex, screen_position);
+
+#[derive(Copy, Clone, Constructor)]
 pub struct Vertex {
     pub position: [f32; 3],
     pub normal: [f32; 3],
