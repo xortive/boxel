@@ -5,7 +5,6 @@ use glium::glutin::event::VirtualKeyCode;
 use glium::vertex::VertexBuffer;
 use glium::{program, uniform};
 use glium::{Display, Surface};
-use ncollide3d::query::{Ray, RayCast};
 
 use glm::{vec3, vec4};
 
@@ -187,8 +186,8 @@ impl Engine {
         let far = glm::unproject(&vec3(1024./2.,768./2.,1.), &view, &proj, vec4(0.,0.,1024.,768.));
         let ray = glm::normalize(&(far-near));
 
-        let ray = Ray::new([eye[0], eye[1], eye[2]].into(), [ray[0], ray[1], ray[2]].into());
-        println!("Ray origin: {} dir: {} far {} eye {}", ray.origin, ray.dir, far, eye);
+        // let ray = Ray::new([eye[0], eye[1], eye[2]].into(), [ray[0], ray[1], ray[2]].into());
+        // println!("Ray origin: {} dir: {} far {} eye {}", ray.origin, ray.dir, far, eye);
         self.world.intersect(&eye, &ray);
     }
 

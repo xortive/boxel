@@ -5,7 +5,6 @@ use glium::Display;
 use glm::Vec3;
 use nalgebra::Point2;
 use std::collections::HashMap;
-use ncollide3d::query::{Ray, RayCast};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use super::march::VoxelMarch;
@@ -65,8 +64,8 @@ impl World {
         }
     }
 
-    pub fn intersect(&mut self, position: &Vec3, ray: &Ray<f32>) {
-        let mut march = VoxelMarch::new(position, &ray.dir);
+    pub fn intersect(&mut self, position: &Vec3, ray: &Vec3) {
+        let mut march = VoxelMarch::new(position, &ray);
         for _ in 0..200 {
             let block = march.next().unwrap().0;
             let chunk = Self::convert_to_chunk(&glm::convert(block));
