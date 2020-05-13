@@ -67,14 +67,15 @@ impl World {
 
     pub fn intersect(&mut self, position: &Vec3, ray: &Ray<f32>) {
         let mut march = VoxelMarch::new(position, &ray.dir);
-        for _ in 0..100 {
+        for _ in 0..200 {
             let block = march.next().unwrap().0;
             let chunk = Self::convert_to_chunk(&glm::convert(block));
+            //println!("collide {}", chunk);
             let chunk = self.chunks.get_mut(&chunk);
             if let Some(chunk) = chunk {
-                let mut marcha = VoxelMarch::new(position, &ray.dir);
-                chunk.remove(&mut marcha);
-                break;
+                if chunk.remove(&mut march) {
+                    break;
+                }
             } else {
                 break;
             }
