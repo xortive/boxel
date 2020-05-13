@@ -51,14 +51,13 @@ impl Iterator for VoxelMarch {
 
   //position, normal
   fn next(&mut self) -> Option<(IVec3, IVec3)> {
-    let pos = self.pos;
     let mut normal = vec3(0, 0, 0);
     let dir = self.tMax.imin();
     normal[dir] = -self.step[dir];
     self.pos[dir] += self.step[dir];
     self.tMax[dir] += self.tD[dir];
     //println!("step to {} from {} in {}... tMax {}", self.pos, pos, dir, self.tMax);
-    Some((pos, normal))
+    Some((self.pos, normal))
   }
 }
 
