@@ -10,11 +10,9 @@ mod primitives;
 mod support;
 
 fn main() {
-    let mut seed = 148714812; 
-    println!("ARGS {}", env::args().len());
+    let mut seed: u32 = rand::random(); 
     if env::args().len() > 1 {
         seed = env::args().nth(1).unwrap().parse().unwrap();
-        println!("new seed {}", seed);
     }
 
     let event_loop = glutin::event_loop::EventLoop::new();
@@ -80,6 +78,6 @@ fn main() {
             },
             _ => (),
         }
-        engine.render();
+        engine.render(1.0 / delta_time.as_secs_f32());
     });
 }

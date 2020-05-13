@@ -29,6 +29,8 @@ pub struct Engine {
     grab: bool,
     crosshair: Crosshair,
     crosshair_program: glium::Program,
+    text_system: glium_text::TextSystem,
+    font: glium_text::FontTexture,
 }
 
 impl Engine {
@@ -65,6 +67,9 @@ impl Engine {
 
         let crosshair = Crosshair::new(&display);
 
+        let text_system = glium_text::TextSystem::new(&display);
+        let font = glium_text::FontTexture::new(&display, &include_bytes!("../../fonts/minecraft.ttf")[..], 12).unwrap();
+
         let display = Box::new(display);
 
         Engine {
@@ -76,10 +81,12 @@ impl Engine {
             grab: true,
             crosshair,
             crosshair_program,
+            text_system,
+            font,
         }
     }
 
-    pub fn render(&mut self) {
+    pub fn render(&mut self, fps: f32) {
         let mut target = self.display.draw();
         target.clear_color_and_depth((0.529, 0.808, 0.980, 1.0), 1.0);
 
@@ -100,6 +107,36 @@ impl Engine {
           persp_matrix: *(self.camera.get_perspective().as_ref()),
           view_matrix: *(self.camera.get_view().as_ref()),
         };
+
+        // draw coordinates to screen
+        let coord_text = glium_text::TextDisplay::new(&self.text_system,
+            &self.font,
+            &format!("X: {:.2}   Y: {:.2}   Z: {:.2}", self.camera.get_position()[0], self.camera.get_position()[1], self.camera.get_position()[2]));
+        const TEXT_SIZE: f32 = 0.02;
+
+        let (w, h) = self.display.get_framebuffer_dimensions();
+
+        let mut matrix:[[f32; 4]; 4] = [
+            [TEXT_SIZE, 0.0, 0.0, 0.0],
+            [0.0, TEXT_SIZE * (w as f32) / (h as f32), 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [-0.95, 0.9, 0.0, 1.0f32]
+        ];
+                        
+        glium_text::draw(&coord_text, &self.text_system, &mut target, matrix, (1.0, 1.0, 1.0, 1.0));
+
+        // let fps_text = glium_text::TextDisplay::new(&self.text_system,
+        //     &self.font,
+        //     &format!("FPS: {:.0}", fps));
+
+        // matrix = [
+        //     [TEXT_SIZE, 0.0, 0.0, 0.0],
+        //     [0.0, TEXT_SIZE * (w as f32) / (h as f32), 0.0, 0.0],
+        //     [0.0, 0.0, 1.0, 0.0],
+        //     [-0.95, 0.8, 0.0, 1.0f32]
+        // ];
+
+        // glium_text::draw(&fps_text, &self.text_system, &mut target, matrix, (1.0, 1.0, 1.0, 1.0));
 
         // draw parameters
         let params = glium::DrawParameters {

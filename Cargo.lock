@@ -97,6 +97,7 @@ dependencies = [
  "derive_more",
  "genmesh",
  "glium",
+ "glium_text",
  "image 0.23.4",
  "nalgebra",
  "nalgebra-glm",
@@ -386,6 +387,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
+name = "freetype-sys"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f9c8666cce7cf6e51a290623647febfbab92480b4c3e0f495cb9d4d312b5d38"
+dependencies = [
+ "libc",
+ "libz-sys",
+ "pkg-config",
+]
+
+[[package]]
 name = "fuchsia-cprng"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -493,6 +505,16 @@ dependencies = [
  "memoffset",
  "smallvec",
  "takeable-option",
+]
+
+[[package]]
+name = "glium_text"
+version = "0.14.0-mod2"
+source = "git+https://github.com/jameshiew/glium_text#b2757e6ff09a0d68a0801b5d3a43583d9ff92982"
+dependencies = [
+ "freetype-sys",
+ "glium",
+ "libc",
 ]
 
 [[package]]
@@ -736,6 +758,18 @@ name = "libm"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7d73b3f436185384286bd8098d17ec07c9a7d2388a6599f824d8502b529702a"
+
+[[package]]
+name = "libz-sys"
+version = "1.0.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2eb5e43362e38e2bca2fd5f5134c4d4564a23a5c28e9b95411652021a8675ebe"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+ "vcpkg",
+]
 
 [[package]]
 name = "line_drawing"
@@ -1561,6 +1595,12 @@ name = "unicode-xid"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "826e7639553986605ec5979c7dd957c7895e93eabed50ab2ffa7f6128a75097c"
+
+[[package]]
+name = "vcpkg"
+version = "0.2.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fc439f2794e98976c88a2a2dafce96b930fe8010b0a256b3c2199a773933168"
 
 [[package]]
 name = "void"

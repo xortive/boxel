@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 glium = "*"
+glium_text = { git = "https://github.com/jameshiew/glium_text"}
 nalgebra = "0.21.0"
 nalgebra-glm = "0.7.0"
 ncollide3d = "0.23" # For 3D collision detection.
