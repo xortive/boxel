@@ -1,5 +1,5 @@
 use crate::primitives::Vertex;
-use crate::support::camera::CameraState;
+use crate::camera::CameraState;
 use genmesh::{self, generators::Cube, MapToVertices, Triangulate, Vertices};
 use glium::glutin::event::VirtualKeyCode;
 use glium::vertex::VertexBuffer;

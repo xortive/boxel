@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 mod config;
 mod engine;
 mod primitives;
-mod support;
+mod camera;
 
 fn main() {
     let mut seed: u32 = rand::random(); 
