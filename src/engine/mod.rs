@@ -7,11 +7,12 @@ use glium::{program, uniform};
 use glium::{Display, Surface};
 use ncollide3d::query::{Ray, RayCast};
 
-use glm::vec3;
+use glm::{vec3, vec4};
 
 mod block;
 mod chunk;
 mod crosshair;
+mod march;
 pub mod generator;
 mod world;
 use world::World;
@@ -21,7 +22,7 @@ use std::time::Duration;
 
 pub struct Engine {
     pub camera: CameraState,
-    pub display: Display,
+    pub display: Box<Display>,
     cube: VertexBuffer<Vertex>,
     program: glium::Program,
     world: World,
@@ -63,6 +64,8 @@ impl Engine {
         let world = World::new();
 
         let crosshair = Crosshair::new(&display);
+
+        let display = Box::new(display);
 
         Engine {
             camera,
@@ -118,17 +121,18 @@ impl Engine {
         self.world.update_chunks(camera_pos, &self.display);
 
         for chunk in self.world.rendered_chunks(camera_pos).iter() {
-            let instance = chunk.per_instance();
+            if let Some(instances) = chunk.per_instance() {
+                target
+                    .draw(
+                        (&self.cube, instances),
+                        &INDICES,
+                        &self.program,
+                        &uniforms,
+                        &params,
+                    )
+                    .unwrap();
+            }
 
-            target
-                .draw(
-                    (&self.cube, instance),
-                    &INDICES,
-                    &self.program,
-                    &uniforms,
-                    &params,
-                )
-                .unwrap();
         }
 
         target.draw(&self.crosshair.vbo, &glium::index::NoIndices(glium::index::PrimitiveType::LinesList), &self.crosshair_program, &glium::uniforms::EmptyUniforms, &Default::default()).unwrap();
@@ -138,16 +142,16 @@ impl Engine {
 
     pub fn process_click(&mut self) {
         println!("Process click");
-        let near = glm::unproject(&nalgebra_glm::vec3(0., 0., 0.), &self.camera.get_perspective(), &self.camera.get_view(), nalgebra_glm::vec4(0., 0., 1024., 768.));
-        let far = glm::unproject(&nalgebra_glm::vec3(0., 0., 1.), &self.camera.get_perspective(), &self.camera.get_view(), nalgebra_glm::vec4(0., 0., 1024., 768.));
-
-        let diff = far - near;
-        let glm_ray = glm::normalize(&diff);
-
         let eye = self.camera.get_position();
-        let ray = Ray::new([eye[0], eye[1], eye[2]].into(), [glm_ray[0], glm_ray[1], glm_ray[2]].into());
-        println!("Ray dir: {}    origin: {}", ray.dir, ray.origin);
-        self.world.intersect(eye, &ray);
+        let view = self.camera.get_view();
+        let proj = self.camera.get_perspective();
+
+        let far = glm::unproject(&vec3(1024./2.,768./2.,1.), &view, &proj, vec4(0.,0.,1024.,768.));
+        let ray = glm::normalize(&(far-eye));
+
+        let ray = Ray::new([eye[0], eye[1], eye[2]].into(), [ray[0], ray[1], ray[2]].into());
+        println!("Ray origin: {} dir: {} far {} eye {}", ray.origin, ray.dir, far, eye);
+        self.world.intersect(&eye, &ray);
     }
 
     pub fn process_keyboard(&mut self, pressed: bool, key: VirtualKeyCode, dt: Duration) {

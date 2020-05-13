@@ -6,9 +6,9 @@ use nalgebra::{Point2, Point3};
 use crate::config::HEIGHT_OFFSET;
 use std::collections::HashSet;
 use std::collections::HashMap;
-use ncollide3d::query::{Ray, RayCast};
-use ncollide3d::shape::Cuboid;
-use nalgebra::Isometry3;
+use super::march::VoxelMarch;
+
+use glm::{IVec3, vec3};
 
 pub const CHUNK_SIZE: i32 = 16;
 
@@ -129,31 +129,29 @@ impl Chunk {
         self.blocks.clone().into_iter().filter(|(pos, _)| self.visible.contains(&pos)).map(|(_, b)| b.into()).collect()
     }
 
-    pub fn intersect(&self, ray: &Ray<f32>) {
-        for (pos, block) in self.blocks.iter() {
-            if !self.visible.contains(pos) {
-                continue;
-            }
+    fn in_chunk(&self, block: &BlockCoordinate) -> bool {
+        (0..CHUNK_SIZE).contains(&block[0]) &&
+        (0..CHUNK_SIZE).contains(&block[2])
+    }
 
-            if block.block_type == BlockType::WATER {
-                continue;
-            }
+    fn to_chunk_coords(&self, block: &IVec3) -> BlockCoordinate {
+        let origin = self.coordinates * CHUNK_SIZE;
+        let block = block - vec3(origin.x, 0, origin.y);
+        block.into()
+    }
 
-            let cube = Cuboid::new([0.5, 0.5, 0.5].into());
-            let translate = glm::translation(&glm::vec3(pos[0] as f32, pos[1] as f32, pos[2] as f32));
-            let iso: Option<Isometry3<f32>> = glm::try_convert(translate);
-
-            let intersection = cube.toi_with_ray(&iso.unwrap(), &ray, std::f32::MAX, true);
-            match intersection {
-                Some(inter) => {
-                    println!("Found an intersection {}", inter);
+    pub fn remove(&mut self, ray: &mut VoxelMarch) -> bool {
+        loop {
+            let block = ray.next().unwrap().0;
+            let pos = self.to_chunk_coords(&block);
+            if !self.in_chunk(&pos) { return false } else {
+                if self.blocks.contains_key(&pos) {
+                    println!("remove {}", block);
+                    self.blocks.remove(&pos);
+                    self.vbo = None;
+                    return true
                 }
-                None => {
-                    println!("No intersection")
-                    // NO-OP
-                }
             }
-            // assert!(cube.intersects_ray(&iso.unwrap(), &ray, std::f32::MAX));
         }
     }
 
@@ -176,17 +174,19 @@ impl Chunk {
     // }
 
     pub fn update_vbo(&mut self, display: &Display) {
-        let instances: Vec<InstanceAttr> = self.get_rendered();
+        if self.vbo.is_none() {
+            let instances: Vec<InstanceAttr> = self.get_rendered();
 
-        println!("{} instances", instances.len());
+            println!("{} instances", instances.len());
 
-        let vbo = VertexBuffer::new(display, &instances).expect("to create vb");
+            let vbo = VertexBuffer::new(display, &instances).expect("to create vb");
 
-        self.vbo = Some(vbo);
+            self.vbo = Some(vbo);
+        }
     }
 
     //loads instance if they don't exist
-    pub fn per_instance(&self) -> PerInstance {
-        self.vbo.as_ref().unwrap().per_instance().unwrap()
+    pub fn per_instance(&self) -> Option<PerInstance> {
+        self.vbo.as_ref().and_then(|vbo| vbo.per_instance().ok())
     }
 }

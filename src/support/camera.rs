@@ -52,6 +52,10 @@ impl CameraState {
         &self.eye
     }
 
+    pub fn get_look(&self) -> &Vec3 {
+        &self.look
+    }
+
     pub fn update(&mut self) {
         let tangent = glm::cross(&self.look, &self.up);
 
