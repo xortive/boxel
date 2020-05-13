@@ -50,7 +50,7 @@ impl World {
 
     pub fn intersect(&mut self, position: &Vec3, ray: &Ray<f32>) {
         let mut march = VoxelMarch::new(position, &ray.dir);
-        for _ in 0..10 {
+        for _ in 0..100 {
             let block = march.next().unwrap().0;
             let chunk = Self::convert_to_chunk(&glm::convert(block));
             let chunk = self.chunks.get_mut(&chunk);

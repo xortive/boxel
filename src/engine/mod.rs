@@ -146,8 +146,9 @@ impl Engine {
         let view = self.camera.get_view();
         let proj = self.camera.get_perspective();
 
+        let near = glm::unproject(&vec3(1024./2.,768./2.,-1.), &view, &proj, vec4(0.,0.,1024.,768.));
         let far = glm::unproject(&vec3(1024./2.,768./2.,1.), &view, &proj, vec4(0.,0.,1024.,768.));
-        let ray = glm::normalize(&(far-eye));
+        let ray = glm::normalize(&(far-near));
 
         let ray = Ray::new([eye[0], eye[1], eye[2]].into(), [ray[0], ray[1], ray[2]].into());
         println!("Ray origin: {} dir: {} far {} eye {}", ray.origin, ray.dir, far, eye);

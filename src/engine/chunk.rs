@@ -136,7 +136,7 @@ impl Chunk {
 
     fn to_chunk_coords(&self, block: &IVec3) -> BlockCoordinate {
         let origin = self.coordinates * CHUNK_SIZE;
-        let block = block - vec3(origin.x, 0, origin.y);
+        let block = block - vec3(origin.x, HEIGHT_OFFSET, origin.y);
         block.into()
     }
 
