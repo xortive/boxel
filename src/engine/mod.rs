@@ -108,21 +108,25 @@ impl Engine {
         };
 
         // draw coordinates to screen
-        let coord_text = glium_text::TextDisplay::new(&self.text_system,
-            &self.font,
-            &format!("X: {:.2}   Y: {:.2}   Z: {:.2}", self.camera.get_position()[0], self.camera.get_position()[1], self.camera.get_position()[2]));
-        const TEXT_SIZE: f32 = 0.02;
-
         let (w, h) = self.display.get_framebuffer_dimensions();
 
-        let mut matrix:[[f32; 4]; 4] = [
-            [TEXT_SIZE, 0.0, 0.0, 0.0],
-            [0.0, TEXT_SIZE * (w as f32) / (h as f32), 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [-0.95, 0.9, 0.0, 1.0f32]
-        ];
+        let mut i = 0;
+        for coord in ["X", "Y", "Z"].iter() {
+            let coord_text = glium_text::TextDisplay::new(&self.text_system,
+                &self.font,
+                &format!("{}: {:.2}", coord, self.camera.get_position()[i]));
+                            
+            const TEXT_SIZE: f32 = 0.04;
+            let matrix: [[f32; 4]; 4] = [
+                [TEXT_SIZE, 0.0, 0.0, 0.0],
+                [0.0, TEXT_SIZE * (w as f32) / (h as f32), 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [-0.95, 0.9 - ((i as f32) * 0.1), 0.0, 1.0f32]
+            ];
+            i += 1;
+            glium_text::draw(&coord_text, &self.text_system, &mut target, matrix, (1.0, 1.0, 1.0, 1.0));
+        }
                         
-        glium_text::draw(&coord_text, &self.text_system, &mut target, matrix, (1.0, 1.0, 1.0, 1.0));
 
         // let fps_text = glium_text::TextDisplay::new(&self.text_system,
         //     &self.font,
