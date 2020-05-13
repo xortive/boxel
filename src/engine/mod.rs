@@ -1,4 +1,4 @@
-use crate::primitives::Vertex;
+use crate::primitives::{Vertex, InstanceAttr};
 use crate::camera::CameraState;
 use genmesh::{self, generators::Cube, MapToVertices, Triangulate, Vertices};
 use glium::glutin::event::VirtualKeyCode;
@@ -6,6 +6,7 @@ use glium::vertex::VertexBuffer;
 use glium::{program, uniform};
 use glium::{Display, Surface};
 use glium::glutin::event;
+use glm::Vec3;
 
 use glm::{vec3, vec4};
 
@@ -31,6 +32,8 @@ pub struct Engine {
     crosshair_program: glium::Program,
     text_system: glium_text::TextSystem,
     font: glium_text::FontTexture,
+    ray: (Vec3, Vec3),
+    ray_program: glium::Program,
 }
 
 impl Engine {
@@ -43,6 +46,11 @@ impl Engine {
 
         let crosshair_program = program!(&display,
             140 => {vertex: include_str!("./../shaders/crosshair_vertex.glsl"), fragment: include_str!("./../shaders/crosshair_fragment.glsl")},
+        )
+        .unwrap();
+
+        let ray_program = program!(&display,
+            140 => {vertex: include_str!("./../shaders/ray_vertex.glsl"), fragment: include_str!("./../shaders/crosshair_fragment.glsl")},
         )
         .unwrap();
 
@@ -83,6 +91,8 @@ impl Engine {
             crosshair_program,
             text_system,
             font,
+            ray: (vec3(0., 0., 0.), vec3(2., 0., 0.)),
+            ray_program,
         }
     }
 
@@ -177,6 +187,20 @@ impl Engine {
         }
 
         target.draw(&self.crosshair.vbo, &glium::index::NoIndices(glium::index::PrimitiveType::LinesList), &self.crosshair_program, &glium::uniforms::EmptyUniforms, &Default::default()).unwrap();
+
+        let instances = vec![
+            InstanceAttr {
+                world_position: (self.ray.0[0], self.ray.0[1], self.ray.0[2]),
+                color: (1., 1., 1., 1.),
+            },
+            InstanceAttr {
+                world_position: (self.ray.1[0], self.ray.1[1], self.ray.1[2]),
+                color: (1., 1., 1., 1.),
+            }
+        ];
+        let rayvbo = glium::VertexBuffer::new(&(*self.display), &instances).expect("to create vb");
+
+        target.draw(&rayvbo, &glium::index::NoIndices(glium::index::PrimitiveType::LinesList), &self.ray_program, &uniforms, &params).unwrap();
         
         target.finish().unwrap();
     }
@@ -190,6 +214,9 @@ impl Engine {
         let near = glm::unproject(&vec3(1024./2.,768./2.,-1.), &view, &proj, vec4(0.,0.,1024.,768.));
         let far = glm::unproject(&vec3(1024./2.,768./2.,1.), &view, &proj, vec4(0.,0.,1024.,768.));
         let ray = glm::normalize(&(far-near));
+
+        self.ray.0 = vec3(eye[0], eye[1], eye[2]);
+        self.ray.1 = eye + ray * 100.;
 
         // let ray = Ray::new([eye[0], eye[1], eye[2]].into(), [ray[0], ray[1], ray[2]].into());
         // println!("Ray origin: {} dir: {} far {} eye {}", ray.origin, ray.dir, far, eye);
