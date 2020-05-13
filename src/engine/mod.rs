@@ -5,6 +5,7 @@ use glium::glutin::event::VirtualKeyCode;
 use glium::vertex::VertexBuffer;
 use glium::{program, uniform};
 use glium::{Display, Surface};
+use glium::glutin::event;
 
 use glm::{vec3, vec4};
 
@@ -180,7 +181,7 @@ impl Engine {
         target.finish().unwrap();
     }
 
-    pub fn process_click(&mut self) {
+    pub fn process_click(&mut self, button: event::MouseButton) {
         println!("Process click");
         let eye = self.camera.get_position();
         let view = self.camera.get_view();
@@ -192,7 +193,16 @@ impl Engine {
 
         // let ray = Ray::new([eye[0], eye[1], eye[2]].into(), [ray[0], ray[1], ray[2]].into());
         // println!("Ray origin: {} dir: {} far {} eye {}", ray.origin, ray.dir, far, eye);
-        self.world.intersect(&eye, &ray);
+
+        let action = match button {
+            event::MouseButton::Left => Some(chunk::IntersectAction::Remove),
+            event::MouseButton::Right => Some(chunk::IntersectAction::Add),
+            _ => None
+        };
+
+        if let Some(a) = action {
+            self.world.intersect(&eye, &ray, &a);
+        }
     }
 
     pub fn process_keyboard(&mut self, pressed: bool, key: VirtualKeyCode, dt: Duration) {

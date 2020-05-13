@@ -1,5 +1,5 @@
 use crate::config::RENDER_DISTANCE;
-use crate::engine::chunk::{Chunk, ChunkCoordinate, CHUNK_SIZE};
+use crate::engine::chunk::{Chunk, ChunkCoordinate, CHUNK_SIZE, IntersectAction};
 use crate::engine::generator::{PerlinGenerator, WorldGenerator};
 use glium::Display;
 use glm::Vec3;
@@ -64,7 +64,7 @@ impl World {
         }
     }
 
-    pub fn intersect(&mut self, position: &Vec3, ray: &Vec3) {
+    pub fn intersect(&mut self, position: &Vec3, ray: &Vec3, action: &IntersectAction) {
         let mut march = VoxelMarch::new(position, &ray);
         for _ in 0..200 {
             let block = march.next().unwrap().0;
@@ -72,7 +72,7 @@ impl World {
             //println!("collide {}", chunk);
             let chunk = self.chunks.get_mut(&chunk);
             if let Some(chunk) = chunk {
-                if chunk.remove(&mut march) {
+                if chunk.intersect(&mut march, &action) {
                     break;
                 }
             } else {

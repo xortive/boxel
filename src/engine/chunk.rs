@@ -22,6 +22,12 @@ pub struct Chunk {
     vbo: Option<VertexBuffer<InstanceAttr>>,
 }
 
+#[derive(Debug)]
+pub enum IntersectAction {
+    Add,
+    Remove
+}
+
 unsafe impl Send for Chunk {}
 
 impl Chunk {
@@ -154,14 +160,17 @@ impl Chunk {
         block.into()
     }
 
-    pub fn remove(&mut self, ray: &mut VoxelMarch) -> bool {
+    pub fn intersect(&mut self, ray: &mut VoxelMarch, action: &IntersectAction) -> bool {
         loop {
-            let block = ray.next().unwrap().0;
+            let (block, normal) = ray.next().unwrap();
             let pos = self.to_chunk_coords(&block);
             if !self.in_chunk(&pos) { return false } else {
                 if self.blocks.contains_key(&pos) {
-                    println!("remove {}", block);
-                    self.blocks.remove(&pos);
+                    println!("{:?} {}", action, block);
+                    match action {
+                        IntersectAction::Remove => {self.blocks.remove(&pos); },
+                        IntersectAction::Add => { self.add_block(pos + normal, BlockType::STONE); }
+                    };
                     self.update_neighbors(&pos);
                     self.vbo = None;
                     return true

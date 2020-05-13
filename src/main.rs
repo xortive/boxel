@@ -64,8 +64,8 @@ fn main() {
                     }
                 }
                 event::WindowEvent::MouseInput { state, button, .. } => {
-                    if state == event::ElementState::Pressed && button == event::MouseButton::Left {
-                        engine.process_click();
+                    if state == event::ElementState::Pressed {
+                        engine.process_click(button);
                     }
                 }
                 _ => return,
