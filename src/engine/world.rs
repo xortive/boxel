@@ -5,6 +5,7 @@ use glium::Display;
 use glm::Vec3;
 use nalgebra::Point2;
 use std::collections::HashMap;
+use ncollide3d::query::{Ray, RayCast};
 
 pub struct World {
     generator: Box<dyn WorldGenerator>,
@@ -40,6 +41,20 @@ impl World {
                     chunk.update_vbo(display);
                     self.chunks.insert(current_chunk, chunk);
                 }
+            }
+        }
+    }
+
+    pub fn intersect(&self, position: &Vec3, ray: &Ray<f32>) {
+        let chunk_coord = self.convert_to_chunk(&position); 
+
+        for x in -RENDER_DISTANCE..=RENDER_DISTANCE {
+            for z in -RENDER_DISTANCE..=RENDER_DISTANCE {
+                let current_chunk = Point2::new(chunk_coord[0] + x, chunk_coord[1] + z);
+                let chunk = self.chunks.get(&current_chunk).unwrap();
+
+                // TODO ignore chunks we cannot see
+                chunk.intersect(ray);
             }
         }
     }

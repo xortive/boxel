@@ -6,6 +6,9 @@ use nalgebra::{Point2, Point3};
 use crate::config::HEIGHT_OFFSET;
 use std::collections::HashSet;
 use std::collections::HashMap;
+use ncollide3d::query::{Ray, RayCast};
+use ncollide3d::shape::Cuboid;
+use nalgebra::Isometry3;
 
 pub const CHUNK_SIZE: i32 = 16;
 
@@ -124,6 +127,34 @@ impl Chunk {
     fn get_rendered(&self) -> Vec<InstanceAttr> {
         // TODO only get visible
         self.blocks.clone().into_iter().filter(|(pos, _)| self.visible.contains(&pos)).map(|(_, b)| b.into()).collect()
+    }
+
+    pub fn intersect(&self, ray: &Ray<f32>) {
+        for (pos, block) in self.blocks.iter() {
+            if !self.visible.contains(pos) {
+                continue;
+            }
+
+            if block.block_type == BlockType::WATER {
+                continue;
+            }
+
+            let cube = Cuboid::new([0.5, 0.5, 0.5].into());
+            let translate = glm::translation(&glm::vec3(pos[0] as f32, pos[1] as f32, pos[2] as f32));
+            let iso: Option<Isometry3<f32>> = glm::try_convert(translate);
+
+            let intersection = cube.toi_with_ray(&iso.unwrap(), &ray, std::f32::MAX, true);
+            match intersection {
+                Some(inter) => {
+                    println!("Found an intersection {}", inter);
+                }
+                None => {
+                    println!("No intersection")
+                    // NO-OP
+                }
+            }
+            // assert!(cube.intersects_ray(&iso.unwrap(), &ray, std::f32::MAX));
+        }
     }
 
     // pub fn add_plane(&mut self) {

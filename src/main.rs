@@ -57,6 +57,11 @@ fn main() {
                         engine.process_keyboard(pressed, key, delta_time);
                     }
                 }
+                event::WindowEvent::MouseInput { state, button, .. } => {
+                    if state == event::ElementState::Pressed && button == event::MouseButton::Left {
+                        engine.process_click();
+                    }
+                }
                 _ => return,
             },
             event::Event::DeviceEvent { event, .. } => match event {

@@ -23,8 +23,17 @@ impl BlockType {
 
 #[derive(Clone, Debug)]
 pub struct Block {
-    pub position: (f32, f32, f32),
+    pub position: (f32, f32, f32), // in world space
     pub block_type: BlockType,
+}
+
+impl Block {
+    pub fn globalToLocal(&self, v: &glm::Vec4) -> glm::Vec3 {
+        let translate = glm::translation(&glm::vec3(self.position.0, self.position.1, self.position.2));
+        let inverse = glm::inverse(&translate);
+        let result = inverse * v;
+        glm::vec3(result[0], result[1], result[2])
+    }
 }
 
 impl Into<InstanceAttr> for Block {

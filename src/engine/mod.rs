@@ -5,6 +5,7 @@ use glium::glutin::event::VirtualKeyCode;
 use glium::vertex::VertexBuffer;
 use glium::{program, uniform};
 use glium::{Display, Surface};
+use ncollide3d::query::{Ray, RayCast};
 
 use glm::vec3;
 
@@ -51,7 +52,9 @@ impl Engine {
                 .triangulate()
                 .vertices()
                 .collect();
-
+            // for test in cube_vertices.iter() {
+            //     println!("CUBE [{}, {}, {}]", test.position[0], test.position[1], test.position[2]);
+            // }
             VertexBuffer::new(&display, cube_vertices.as_slice()).unwrap()
         };
 
@@ -103,7 +106,7 @@ impl Engine {
                 ..Default::default()
             },
             blend: glium::draw_parameters::Blend::alpha_blending(),
-            // backface_culling: glium::draw_parameters::BackfaceCullingMode::CullClockwise,
+            backface_culling: glium::draw_parameters::BackfaceCullingMode::CullCounterClockwise,
             ..Default::default()
         };
 
@@ -131,6 +134,20 @@ impl Engine {
         target.draw(&self.crosshair.vbo, &glium::index::NoIndices(glium::index::PrimitiveType::LinesList), &self.crosshair_program, &glium::uniforms::EmptyUniforms, &Default::default()).unwrap();
         
         target.finish().unwrap();
+    }
+
+    pub fn process_click(&mut self) {
+        println!("Process click");
+        let near = glm::unproject(&nalgebra_glm::vec3(0., 0., 0.), &self.camera.get_perspective(), &self.camera.get_view(), nalgebra_glm::vec4(0., 0., 1024., 768.));
+        let far = glm::unproject(&nalgebra_glm::vec3(0., 0., 1.), &self.camera.get_perspective(), &self.camera.get_view(), nalgebra_glm::vec4(0., 0., 1024., 768.));
+
+        let diff = far - near;
+        let glm_ray = glm::normalize(&diff);
+
+        let eye = self.camera.get_position();
+        let ray = Ray::new([eye[0], eye[1], eye[2]].into(), [glm_ray[0], glm_ray[1], glm_ray[2]].into());
+        println!("Ray dir: {}    origin: {}", ray.dir, ray.origin);
+        self.world.intersect(eye, &ray);
     }
 
     pub fn process_keyboard(&mut self, pressed: bool, key: VirtualKeyCode, dt: Duration) {
