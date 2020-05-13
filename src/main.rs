@@ -1,4 +1,5 @@
 use glium::glutin;
+use std::env;
 extern crate nalgebra_glm as glm;
 
 use std::time::{Duration, Instant};
@@ -9,6 +10,13 @@ mod primitives;
 mod support;
 
 fn main() {
+    let mut seed = 148714812; 
+    println!("ARGS {}", env::args().len());
+    if env::args().len() > 1 {
+        seed = env::args().nth(1).unwrap().parse().unwrap();
+        println!("new seed {}", seed);
+    }
+
     let event_loop = glutin::event_loop::EventLoop::new();
 
     let window = glutin::window::WindowBuilder::new()
@@ -22,7 +30,7 @@ fn main() {
     let display = glium::Display::new(window, context, &event_loop).unwrap();
     let _scale_factor = display.gl_window().window().scale_factor();
 
-    let mut engine = engine::Engine::new(display);
+    let mut engine = engine::Engine::new(display, seed);
 
     let mut last_frame = Instant::now();
 

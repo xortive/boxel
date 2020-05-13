@@ -16,11 +16,13 @@ pub type ChunkCoordinate = Point2<i32>; // chunk space
 pub type BlockCoordinate = Point3<i32>; // block space in a chunk (CHUNK_LENGTH x CHUNK_WIDTH x CHUNK_HEIGHT)
 
 pub struct Chunk {
-    coordinates: ChunkCoordinate, //in chunk space, so (0, 0) is the chunk from worldspace (0,y,0) to (16,y,16);
+    pub coordinates: ChunkCoordinate, //in chunk space, so (0, 0) is the chunk from worldspace (0,y,0) to (16,y,16);
     blocks: HashMap<BlockCoordinate, Block>, 
     visible: HashSet<BlockCoordinate>,
     vbo: Option<VertexBuffer<InstanceAttr>>,
 }
+
+unsafe impl Send for Chunk {}
 
 impl Chunk {
     pub fn new(coordinates: ChunkCoordinate) -> Chunk {
@@ -76,6 +78,10 @@ impl Chunk {
 
             let mut visible = false;
             for adjacent in self.get_adjacent(coordinate) {
+                if adjacent[1] == -HEIGHT_OFFSET {
+                    continue;
+                }
+                // println!("{}", adjacent);
                 // if self.on_edge(&adjacent) {
                 //     continue;
                 // }
@@ -101,6 +107,14 @@ impl Chunk {
         }
         println!("Visible size: {}", self.visible.len());
         println!("finished updating visible");
+    }
+
+    pub fn update_neighbors(&mut self, position: &BlockCoordinate) {
+        for neighbor in self.get_adjacent(position) {
+            if !self.visible.contains(&neighbor) && self.blocks.contains_key(&neighbor) {
+                self.visible.insert(neighbor);
+            }
+        }
     }
 
     pub fn add_block(&mut self, coordinate: BlockCoordinate, block_type: BlockType) {
@@ -148,6 +162,7 @@ impl Chunk {
                 if self.blocks.contains_key(&pos) {
                     println!("remove {}", block);
                     self.blocks.remove(&pos);
+                    self.update_neighbors(&pos);
                     self.vbo = None;
                     return true
                 }

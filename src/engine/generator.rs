@@ -1,6 +1,7 @@
 use crate::engine::block::BlockType;
 use crate::engine::chunk::{Chunk, ChunkCoordinate};
 use crate::config::HEIGHT_OFFSET;
+use rand;
 
 use glm::{vec2};
 use noise::{Perlin, NoiseFn, Seedable};
@@ -40,9 +41,9 @@ pub struct PerlinGenerator {
 }
 
 impl PerlinGenerator {
-    pub fn new() -> PerlinGenerator {
-        let perlin = Perlin::new();
-        perlin.set_seed(1234);
+    pub fn new(seed: u32) -> PerlinGenerator {
+        let mut perlin = Perlin::new();
+        perlin = perlin.set_seed(seed);
         PerlinGenerator {
             perlin
         }

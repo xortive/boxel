@@ -32,7 +32,7 @@ pub struct Engine {
 }
 
 impl Engine {
-    pub fn new(display: Display) -> Engine {
+    pub fn new(display: Display, seed: u32) -> Engine {
         // the program
         let program = program!(&display,
             140 => {vertex: include_str!("./../shaders/vertex.glsl"), fragment: include_str!("./../shaders/fragment.glsl")},
@@ -61,7 +61,7 @@ impl Engine {
 
         let camera = CameraState::new();
 
-        let world = World::new();
+        let world = World::new(seed);
 
         let crosshair = Crosshair::new(&display);
 

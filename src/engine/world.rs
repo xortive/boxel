@@ -6,18 +6,24 @@ use glm::Vec3;
 use nalgebra::Point2;
 use std::collections::HashMap;
 use ncollide3d::query::{Ray, RayCast};
+use std::sync::{Arc, Mutex};
+use std::thread;
 use super::march::VoxelMarch;
 
 pub struct World {
-    generator: Box<dyn WorldGenerator>,
+    generator: Arc<Mutex<dyn WorldGenerator + Send>>,
     chunks: HashMap<ChunkCoordinate, Chunk>,
+    chunk_queue: Arc<Mutex<Vec<Chunk>>>,
+    generated: Vec<ChunkCoordinate>,
 }
 
 impl World {
-    pub fn new() -> World {
+    pub fn new(seed: u32) -> World {
         World {
-            generator: Box::new(PerlinGenerator::new()),
+            generator: Arc::new(Mutex::new(PerlinGenerator::new(seed))),
             chunks: HashMap::new(),
+            chunk_queue: Arc::new(Mutex::new(Vec::new())),
+            generated: Vec::new(),
         }
     }
 
@@ -31,15 +37,26 @@ impl World {
 
     pub fn update_chunks(&mut self, position: &Vec3, display: &Display) {
         let chunk_coord = Self::convert_to_chunk(&position);
+
+        for chunk in self.chunk_queue.lock().unwrap().drain(0..) {
+            self.chunks.insert(chunk.coordinates, chunk);
+        }
+
         for x in -RENDER_DISTANCE..=RENDER_DISTANCE {
             for z in -RENDER_DISTANCE..=RENDER_DISTANCE {
                 let current_chunk = Point2::new(chunk_coord[0] + x, chunk_coord[1] + z);
 
-                if !self.chunks.contains_key(&current_chunk) {
+                if !self.chunks.contains_key(&current_chunk) && !self.generated.contains(&current_chunk) {
                     println!("Generating chunk {}", current_chunk);
-                    let mut chunk = self.generator.generate(current_chunk);
-                    chunk.update_visible();
-                    self.chunks.insert(current_chunk, chunk);
+                    self.generated.push(current_chunk);
+                    let queue = self.chunk_queue.clone();
+                    let generator = self.generator.clone();
+                    thread::spawn(move || {
+                        let mut chunk = generator.lock().unwrap().generate(current_chunk);
+                        chunk.update_visible();
+                        queue.lock().unwrap().push(chunk);
+                    });
+                    // self.chunks.insert(current_chunk, chunk);
                 } else if let Some(chunk) = self.chunks.get_mut(&current_chunk) {
                     chunk.update_vbo(&display);
                 }
@@ -70,7 +87,10 @@ impl World {
         for x in -RENDER_DISTANCE..=RENDER_DISTANCE {
             for z in -RENDER_DISTANCE..=RENDER_DISTANCE {
                 let current_chunk = Point2::new(chunk_coord[0] + x, chunk_coord[1] + z);
-                output.push(self.chunks.get(&current_chunk).unwrap())
+                if let Some(chunk) = self.chunks.get(&current_chunk) {
+                    output.push(chunk);
+                }
+                // output.push(self.chunks.get(&current_chunk).unwrap())
             }
         }
 
